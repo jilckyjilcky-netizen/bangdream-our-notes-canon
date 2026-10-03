@@ -1,0 +1,421 @@
+{
+  "_generated": "2026-09-26T02:39:15.311Z",
+  "_source": "<上游域已移除> MasterBand + MasterCharacter",
+  "speakerSeparator": "・",
+  "narratorFallback": "旁白",
+  "bands": [
+    {
+      "id": 1,
+      "name": {
+        "zh": "MyGO!!!!!",
+        "ja": "MyGO!!!!!"
+      },
+      "slug": "MyGO_"
+    },
+    {
+      "id": 2,
+      "name": {
+        "zh": "Ave Mujica",
+        "ja": "Ave Mujica"
+      },
+      "slug": "Ave_Mujica"
+    },
+    {
+      "id": 3,
+      "name": {
+        "zh": "〔原文略〕",
+        "ja": "夢限大みゅーたいぷ"
+      },
+      "slug": "〔原文略〕"
+    },
+    {
+      "id": 4,
+      "name": {
+        "zh": "millsage",
+        "ja": "millsage"
+      },
+      "slug": "millsage"
+    },
+    {
+      "id": 5,
+      "name": {
+        "zh": "〔原文略〕",
+        "ja": "〔原文略〕"
+      },
+      "slug": "一家Dumb_Rock_"
+    }
+  ],
+  "characters": [
+    {
+      "id": 1,
+      "bandId": 1,
+      "band": "MyGO!!!!!",
+      "bandSlug": "MyGO_",
+      "short": "灯",
+      "shortJa": "燈",
+      "real": "高松灯",
+      "realJa": "高松 燈",
+      "full": "高松灯",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 2,
+      "bandId": 1,
+      "band": "MyGO!!!!!",
+      "bandSlug": "MyGO_",
+      "short": "爱音",
+      "shortJa": "愛音",
+      "real": "千早爱音",
+      "realJa": "千早 愛音",
+      "full": "千早爱音",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 3,
+      "bandId": 1,
+      "band": "MyGO!!!!!",
+      "bandSlug": "MyGO_",
+      "short": "乐奈",
+      "shortJa": "楽奈",
+      "real": "要乐奈",
+      "realJa": "要 楽奈",
+      "full": "要乐奈",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 4,
+      "bandId": 1,
+      "band": "MyGO!!!!!",
+      "bandSlug": "MyGO_",
+      "short": "爽世",
+      "shortJa": "そよ",
+      "real": "长崎爽世",
+      "realJa": "長崎 そよ",
+      "full": "长崎爽世",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 5,
+      "bandId": 1,
+      "band": "MyGO!!!!!",
+      "bandSlug": "MyGO_",
+      "short": "立希",
+      "shortJa": "立希",
+      "real": "椎名立希",
+      "realJa": "椎名 立希",
+      "full": "椎名立希",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 6,
+      "bandId": 2,
+      "band": "Ave Mujica",
+      "bandSlug": "Ave_Mujica",
+      "short": "初华",
+      "shortJa": "初華",
+      "real": "三角初华",
+      "realJa": "三角 初華",
+      "full": "Doloris / 三角初华",
+      "stageName": "Doloris",
+      "stageNameJa": "ドロリス"
+    },
+    {
+      "id": 7,
+      "bandId": 2,
+      "band": "Ave Mujica",
+      "bandSlug": "Ave_Mujica",
+      "short": "睦",
+      "shortJa": "睦",
+      "real": "若叶睦",
+      "realJa": "若葉 睦",
+      "full": "〔原文略〕 / 若叶睦",
+      "stageName": "Mortis",
+      "stageNameJa": "モーティス"
+    },
+    {
+      "id": 8,
+      "bandId": 2,
+      "band": "Ave Mujica",
+      "bandSlug": "Ave_Mujica",
+      "short": "海铃",
+      "shortJa": "海鈴",
+      "real": "八幡海铃",
+      "realJa": "八幡 海鈴",
+      "full": "Timoris / 八幡海铃",
+      "stageName": "Timoris",
+      "stageNameJa": "ティモリス"
+    },
+    {
+      "id": 9,
+      "bandId": 2,
+      "band": "Ave Mujica",
+      "bandSlug": "Ave_Mujica",
+      "short": "若麦",
+      "shortJa": "にゃむ",
+      "real": "祐天寺若麦",
+      "realJa": "祐天寺 にゃむ",
+      "full": "〔原文略〕 / 祐天寺若麦",
+      "stageName": "Amoris",
+      "stageNameJa": "アモーリス"
+    },
+    {
+      "id": 10,
+      "bandId": 2,
+      "band": "Ave Mujica",
+      "bandSlug": "Ave_Mujica",
+      "short": "祥子",
+      "shortJa": "祥子",
+      "real": "丰川祥子",
+      "realJa": "豊川 祥子",
+      "full": "〔原文略〕 / 丰川祥子",
+      "stageName": "Oblivionis",
+      "stageNameJa": "オブリビオニス"
+    },
+    {
+      "id": 11,
+      "bandId": 3,
+      "band": "〔原文略〕",
+      "bandSlug": "〔原文略〕",
+      "short": "阿拉蕾",
+      "shortJa": "あられ",
+      "real": "仲町阿拉蕾",
+      "realJa": "仲町 あられ",
+      "full": "仲町阿拉蕾",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 12,
+      "bandId": 3,
+      "band": "〔原文略〕",
+      "bandSlug": "〔原文略〕",
+      "short": "野乃花",
+      "shortJa": "ののか",
+      "real": "宫永野乃花",
+      "realJa": "宮永 ののか",
+      "full": "宫永野乃花",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 13,
+      "bandId": 3,
+      "band": "〔原文略〕",
+      "bandSlug": "〔原文略〕",
+      "short": "律",
+      "shortJa": "律",
+      "real": "峰月律",
+      "realJa": "峰月 律",
+      "full": "峰月律",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 14,
+      "bandId": 3,
+      "band": "〔原文略〕",
+      "bandSlug": "〔原文略〕",
+      "short": "都子",
+      "shortJa": "都子",
+      "real": "藤都子",
+      "realJa": "藤 都子",
+      "full": "藤都子",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 15,
+      "bandId": 3,
+      "band": "〔原文略〕",
+      "bandSlug": "〔原文略〕",
+      "short": "由乃",
+      "shortJa": "ユノ",
+      "real": "千石由乃",
+      "realJa": "千石 ユノ",
+      "full": "千石由乃",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 16,
+      "bandId": 4,
+      "band": "millsage",
+      "bandSlug": "millsage",
+      "short": "萤",
+      "shortJa": "蛍",
+      "real": "汐见萤",
+      "realJa": "汐見 蛍",
+      "full": "汐见萤",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 17,
+      "bandId": 4,
+      "band": "millsage",
+      "bandSlug": "millsage",
+      "short": "枣",
+      "shortJa": "なつめ",
+      "real": "伊泽枣",
+      "realJa": "伊沢 なつめ",
+      "full": "伊泽枣",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 18,
+      "bandId": 4,
+      "band": "millsage",
+      "bandSlug": "millsage",
+      "short": "凪",
+      "shortJa": "凪",
+      "real": "琴平凪",
+      "realJa": "琴平 凪",
+      "full": "琴平凪",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 19,
+      "bandId": 4,
+      "band": "millsage",
+      "bandSlug": "millsage",
+      "short": "茉幌",
+      "shortJa": "まほろ",
+      "real": "滨崎茉幌",
+      "realJa": "浜崎 まほろ",
+      "full": "滨崎茉幌",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 20,
+      "bandId": 4,
+      "band": "millsage",
+      "bandSlug": "millsage",
+      "short": "朋花",
+      "shortJa": "朋花",
+      "real": "和泉朋花",
+      "realJa": "和泉 朋花",
+      "full": "和泉朋花",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 21,
+      "bandId": 5,
+      "band": "〔原文略〕",
+      "bandSlug": "一家Dumb_Rock_",
+      "short": "蕾叶",
+      "shortJa": "蕾叶",
+      "real": "须贺蕾叶",
+      "realJa": "須賀 蕾叶",
+      "full": "须贺蕾叶",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 22,
+      "bandId": 5,
+      "band": "〔原文略〕",
+      "bandSlug": "一家Dumb_Rock_",
+      "short": "心玖",
+      "shortJa": "心玖",
+      "real": "马桥心玖",
+      "realJa": "馬橋 心玖",
+      "full": "马桥心玖",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 23,
+      "bandId": 5,
+      "band": "〔原文略〕",
+      "bandSlug": "一家Dumb_Rock_",
+      "short": "蓬咲",
+      "shortJa": "蓬咲",
+      "real": "矢仓蓬咲",
+      "realJa": "矢倉 蓬咲",
+      "full": "矢仓蓬咲",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 24,
+      "bandId": 5,
+      "band": "〔原文略〕",
+      "bandSlug": "一家Dumb_Rock_",
+      "short": "千樱梨",
+      "shortJa": "ちえり",
+      "real": "梅里千樱梨",
+      "realJa": "梅里 ちえり",
+      "full": "梅里千樱梨",
+      "stageName": null,
+      "stageNameJa": null
+    },
+    {
+      "id": 25,
+      "bandId": 5,
+      "band": "〔原文略〕",
+      "bandSlug": "一家Dumb_Rock_",
+      "short": "宁月",
+      "shortJa": "寧月",
+      "real": "四宫宁月",
+      "realJa": "四宮 寧月",
+      "full": "四宫宁月",
+      "stageName": null,
+      "stageNameJa": null
+    }
+  ],
+  "stageNameToShort": {
+    "Doloris": "初华",
+    "Mortis": "睦",
+    "Timoris": "海铃",
+    "Amoris": "若麦",
+    "Oblivionis": "祥子"
+  },
+  "keepSeparate": [
+    "小萤"
+  ],
+  "genericRoles": [
+    "经纪人",
+    "化妆师",
+    "店员",
+    "邻居",
+    "记者",
+    "代理",
+    "店长",
+    "工作人员",
+    "主持人",
+    "路人1",
+    "路人2",
+    "少女",
+    "小孩子",
+    "狗",
+    "丸君",
+    "铃木",
+    "同班同学A",
+    "同班同学B",
+    "同班同学C",
+    "同班同学D",
+    "初中部学生A",
+    "初中部学生B",
+    "女高中生A",
+    "女顾客",
+    "朋友A",
+    "朋友B",
+    "粉丝A",
+    "粉丝B",
+    "观众们",
+    "问答节目主持人",
+    "食兔酱的粉丝",
+    "萤的母亲",
+    "蕾叶的祖母",
+    "旁白"
+  ]
+}

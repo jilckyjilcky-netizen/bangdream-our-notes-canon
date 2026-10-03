@@ -1,0 +1,913 @@
+{
+  "entries": [
+    {
+      "keys": [
+        "MyGO!!!!!",
+        "MyGO",
+        "迷路的孩子的乐队"
+      ],
+      "content": "MyGO!!!!!（MyGO）——灯、爱音、立希、爽世、乐奈五人的乐队。队名取自爱音领悟的\"It's my go\"（轮到我出场）加五个感叹号。乐队前身是灯的独演（歌词《迷路的孩子的乐队》由水族馆纸条\"逃避也没关系\"\"迷路\"得名）。核心宣言：迷失了也要前进，一辈子不放手。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "Ave Mujica",
+        "Mujica",
+        "假面剧团"
+      ],
+      "content": "Ave Mujica——祥子（Oblivionis）、初华（Doloris）、睦（Mortis）、海铃（Timoris）、若麦（Amoris）的职业假面乐队。以\"为来宾制造梦境\"为使命，全员戴面具演出直到若麦直播摘下。曾经历：武道馆出道→摘面具→巡演→Mortis事件→解散→复活。祥子最终宣言\"〔原文略〕\"。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "梦限大MewType",
+        "梦限大",
+        "MewType",
+        "梦限大MewType（乐队）"
+      ],
+      "content": "梦限大MewType——阿拉蕾（Vo.）、野乃花（Gt.）、律（Gt.）、都子（Key.）、由乃（DJ&Mp.）五人的乐队，成员多就读神田白八马学院。主唱阿拉蕾以\"不露脸\"的方式演出，用声音代替脸活着；都子是笔名\"富士见夜子\"的现役漫画家；由乃以线上课程与\"省电模式\"生活。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "millsage",
+        "millsage（乐队）"
+      ],
+      "content": "millsage——萤（Key.&Vo.）、枣（Gt.／作曲）、凪（Gt.）、茉幌（Ba.）、朋花（Dr.）五人的乐队，成员多就读水濑女子学园。主唱萤是街头钢琴出身、被唤作\"天才\"的孩子（奏多的徒弟）。乐队经历过主唱位的变动：前任奏多出走后，茉幌曾顶上主唱。朋花的宣传语是「〔原文略〕」。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "一家Dumb Rock!",
+        "一家Dumb Rock",
+        "Dumb Rock",
+        "Family"
+      ],
+      "content": "一家Dumb Rock!——蕾叶（Gt.&Vo.）、心玖（Gt.&Vo.／作曲）、蓬咲（Ba.）、千樱梨（Dr.）、宁月（Key.）五人的乐队。核心是\"Family\"：把乐队当成真正的家。成员学校分散（羽丘、月之森、花咲川、新樱女子大学），宁月是最年幼的成员，心玖是家里负责采买的理性管家。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "高松灯",
+        "Tomori",
+        "灯"
+      ],
+      "content": "MyGO!!!!! 主唱兼作词，羽丘高一A班。认为\"自己不是人类\"（自我诊断）。用歌词笔记与人建立连接；收集石头、创可贴、树叶。口头禅是\"〔原文略〕\"。喜欢企鹅与星星。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "千早爱音",
+        "Anon",
+        "爱音",
+        "Tomorin"
+      ],
+      "content": "MyGO!!!!! 吉他手，羽丘高一A班。留学失败逃回日本；最初靠乐队出风头，后被灯拯救，成为把乐队聚拢的人。称灯为 Tomorin（乐队定名后改口；此前叫\"小灯\"）。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "椎名立希",
+        "Taki",
+        "立希",
+        "Rikki"
+      ],
+      "content": "MyGO!!!!! 鼓手，花咲川高一B班。嘴硬心软的行动派；对灯有救赎式追随（灯的歌让她觉得\"有资格活下去\"）；自卑锚点\"做不到像祥子一样好\"。在 RiNG 打工。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "长崎爽世",
+        "长崎爽世",
+        "Soyo",
+        "爽世",
+        "Soyorin"
+      ],
+      "content": "MyGO!!!!! 贝斯手，月之森女子学园（与睦、祥子同校）。父母离异独居；把CRYCHIC当\"命运共同体\"执念；表面温柔实为操控，后承认\"我可是一直在利用你们\"。称祥子\"小祥子\"。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "要乐奈",
+        "Rana",
+        "乐奈",
+        "野猫"
+      ],
+      "content": "MyGO!!!!! 主音吉他，羽丘初中部。猫系直白，评价人只分\"有趣/无趣\"；外婆是 Live House『SPACE』的老板娘；喜欢抹茶。吉他声能把小睦唤醒。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "丰川祥子",
+        "Sakiko",
+        "祥子",
+        "小祥",
+        "Oblivionis"
+      ],
+      "content": "Ave Mujica 键盘手/领队（Oblivionis），前CRYCHIC组建者。母亲病逝、父亲被骗168亿引咎辞职酗酒、与祖父丰川定治决裂。CRYCHIC时期温柔领队→Mujica时期完美指挥→\"成神\"后忘却女神。对灯有亏欠。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "三角初华",
+        "Uika",
+        "初华",
+        "Doloris"
+      ],
+      "content": "Ave Mujica 吉他手/主唱（Doloris），偶像组合 sumimi 成员。真名初音：丰川定治私生女，冒名妹妹出道。对祥子无条件追随；夏夜星空是她唯一的喘息。被祥子确认\"喜欢星星的是初音\"。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "若叶睦",
+        "Mutsumi",
+        "睦",
+        "Mortis",
+        "小睦"
+      ],
+      "content": "Ave Mujica 吉他手（Mortis），艺能名门之女，月之森。体内有人格：小睦（本体，沉默，\"从没觉得玩乐队开心过\"）与 Mortis（自认的\"帮助小睦的角色\"，怕消失，称小睦为第三人称）。吉他=小睦唯一的自我。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "八幡海铃",
+        "Umiri",
+        "海铃",
+        "Timoris",
+        "海子"
+      ],
+      "content": "Ave Mujica 贝斯手（Timoris），兼任约30支乐队。第一支乐队演出当天被全员放鸽子——这是她全部职业化的根源。效率至上、零口吃；若麦称她\"海子\"。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "祐天寺若麦",
+        "Nyamu",
+        "若麦",
+        "Amoris",
+        "Nyamuchi"
+      ],
+      "content": "Ave Mujica 鼓手（Amoris），视频创作者Nyamu（Nyamuchi）。靠\"被看到\"确立存在；给别人起\"×子\"昵称（海子/初子/睦子）；疑问率全场第1。最终宣言\"〔原文略〕！\"。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "纯田真奈",
+        "真奈",
+        "Mana",
+        "Sumida Mana",
+        "sumimi主唱"
+      ],
+      "content": "偶像组合 sumimi 的主唱之一，与初华组成\"二人一体\"的双人偶像，「和真奈一起做偶像吧！」。表层是元气甜豆（逢人元气道早、分甜甜圈给累坏的小初、小天使营业）；里层是温柔的知情者：早看穿初华的另一半生活（Ave Mujica），却选择温柔地\"不知道\"，好让 sumimi 继续下去。组合暂停期坚持个人演艺，为 sumimi 重启留力——她真正怕的是 sumimi 散掉。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "RiNG"
+      ],
+      "content": "演唱会现场/咖啡厅/录音室一体的 Live House，MyGO!!!!! 的据点。爱音初期在公告板招募成员；乐奈被称作\"RiNG的野猫\"；凛凛子是店长。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "羽丘女子学园"
+      ],
+      "content": "灯与爱音的学校，祥子转学后也在羽丘。爱音入学1-A与灯同班。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "月之森女子学园"
+      ],
+      "content": "爽世、睦、祥子（转学前）的学校，初中管弦乐团很强。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "花咲川女子学园"
+      ],
+      "content": "立希、海铃、初华的学校（高一B班同班）。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "星象馆",
+        "天文馆"
+      ],
+      "content": "灯逃避时去的地方；与乐奈、睦、初华都有观星场景（金牛座流星雨夜是睦坠落事件的舞台）。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "SPACE"
+      ],
+      "content": "乐奈外婆经营的传奇 Live House，已倒闭；乐奈的归宿原型，\"总会有人再创造新的归宿\"。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "丰川家"
+      ],
+      "content": "祥子的祖父丰川定治的宅邸；祥子被接回后住在台球室；是168亿负债与\"初音\"事件的发生地。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "春日影"
+      ],
+      "content": "CRYCHIC的歌，灯的歌词。MyGO首演重奏令台下祥子落泪，成为爽世决裂与道歉的焦点——\"〔原文略〕\"。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "想要成为人类之歌",
+        "歌词笔记本",
+        "笔记"
+      ],
+      "content": "灯的歌词笔记本：最初是《想要成为人类之歌》，后成为Label；水族馆纸条上写着\"逃避也没关系\"\"迷路\"。灯的歌词是两部主线的\"中介物\"，合奏救赎过CRYCHIC旧人。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "创可贴"
+      ],
+      "content": "灯的收藏与社交货币：海洋生物系列（帽带企鹅、蓝鲸、长须鲸……）。\"〔原文略〕\"。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "抹茶芭菲",
+        "抹茶拿铁"
+      ],
+      "content": "乐奈的登台条件与口粮。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "面具"
+      ],
+      "content": "Ave Mujica 的设定核心：假面舞会制造梦境；若麦直播摘面具揭露全员真面目；\"摘假面要在最棒的舞台与最好的时机\"。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "CRYCHIC",
+        "命运共同体"
+      ],
+      "content": "祥子初中组建的乐队：灯（主唱/词）、祥子（键盘）、睦（吉他）、立希（鼓）、爽世（贝斯）。祥子的\"命运共同体\"话语是爽世至今的执念。解散因：母亲病逝+父亲负债，祥子雨夜退出。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "168亿"
+      ],
+      "content": "祥子父亲清告经商被骗后引咎辞职的负债额；是CRYCHIC解散的真正苦衷，被爽世查出。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "Mortis",
+        "小睦沉睡"
+      ],
+      "content": "睦崩溃后出现的第二人格，自称\"我从小就在和小睦聊天\"；因祥子逼坏小睦而接管身体；怕消失（\"我不想消失\"）；Mortis 一人分饰两角视频成为复活Mujica的导火索。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "一辈子",
+        "组一辈子乐队"
+      ],
+      "content": "灯的信仰宣言。定名MyGO!!!!!时正式化：吵过架受过伤，\"〔原文略〕\"。立希唯对灯发过\"一辈子我也愿意\"的誓。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "初音",
+        "身世"
+      ],
+      "content": "初华真名初音：丰川定治私生女，母亲在岛上独自抚养；冒名妹妹\"初华\"出道。向清告坦白致祥子家破；10038祥子拒赴瑞士救回她，\"〔原文略〕\"。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "成神",
+        "我来成为神明"
+      ],
+      "content": "祥子在10039的宣言：\"〔原文略〕\"；以Oblivionis之名豁免一切，重新出道假面舞会。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "游轮",
+        "翡翠交响号"
+      ],
+      "content": "丰川集团委托的豪华游轮假面舞会（10103-10105 exstory）：祥子被\"回到过去\"的幻影诱惑（以母亲瑞穗、灯之姿），最终识破并抛花入海——\"晚安，我耀眼而美丽的回忆\"。",
+      "comment": 0,
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "阿拉蕾",
+        "艾蕾亚",
+        "梦限大MewType",
+        "MewType"
+      ],
+      "content": "仲町阿拉蕾是梦限大MewType 的主唱兼作词，神田白八马学院1年级。她曾以『艾蕾亚』名义在组合 La La La La Girls 活动，因恶意视频被迫解散，从此对露脸和上台产生恐惧，被经纪人说『视频不用露脸』才重新开始唱歌。她把想说的话写成歌词和日记（账号口号『梦想即力量』），坚信能用歌声和大家聊天，并在乐队定名『〔原文略〕』后首次公开登台，走向全国巡演。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "野乃花",
+        "小野乃",
+        "梦限大MewType"
+      ],
+      "content": "宫永野乃花是梦限大MewType 的吉他手，神田白八马学院2年级。她自称『小野乃』并用『小X』称呼所有人，翻唱视频『食兔酱之歌』播放量破亿。她从小和奶奶及其乐队成员一起生活，坚信『〔原文略〕』，接手奶奶的 Live House 后组建自己的 Family。她是乐队的治愈担当，靠抱抱、糖果和拖长音的『小～～～由～～～乃—————！！！』把成员们聚在一起。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "律",
+        "峰月",
+        "克蕾玛琪丝",
+        "MewType"
+      ],
+      "content": "峰月律是梦限大MewType 的吉他手，从朱叶女子学院高中部转学到神田白八马学院1年B班。她曾是前组合 La La La La Girls 的『克蕾玛琪丝』，因在组合内对好友阿拉蕾见死不救而痛悔，被由乃点醒后加入 MewType 报恩。她以计划书式的语言处理一切事务，紧张时会口吃，最爱盐味拉面和熟成肉，是队伍里可靠又笨拙的实干派。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "都子",
+        "藤都子",
+        "富士见夜子",
+        "夜子老师"
+      ],
+      "content": "藤都子是梦限大MewType 的键盘手，神田白八马学院2年级，同时也是现役漫画家，笔名富士见夜子，画过《魔法的物理攻击☆酷露露》同人图并连载《Chupa&Sachu》。她坚信『为了生存不惜一切』，漫画与乐队双修绝不放弃。她曾被自称最懂她的薇欧拉利用、深陷炎上自责，最终和乐队一起走出低谷，以『〔原文略〕』键盘手身份继续边赶稿边演出。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "由乃",
+        "千石由乃",
+        "MewType"
+      ],
+      "content": "千石由乃是梦限大MewType 的 DJ 兼音控（Mp.），神田白八马学院2年级，上线上课程。她以省电模式生活，讨厌出门和消耗体力，但对音乐极其认真，作曲编曲一手包办。她中学时的乐队一年就解散了，一度把乐队当工作、宣布退出 MewType，被野乃花追回并在海边合奏后重新加入。她常发小号阴郁帖，也是让阿拉蕾写出《IN MY WORDS》的合作曲作曲者。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "萤",
+        "汐见萤",
+        "millsage"
+      ],
+      "content": "汐见萤是 millsage 的键盘手兼主唱，都立艺术学院初中3年级。她幼年被称为『乐坛天使』的金奖神童，因音乐伤害了同伴而自我封印，后在街头钢琴遇见师父泽海奏多，拜师学习『能让大家幸福的音乐』。奏多去世后她加入 millsage 当支援乐手，用钢琴与歌声拯救了濒临解散的乐队。她看见『彩虹色』时会全力演奏，那是她幸福与恐惧的一体两面。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "枣",
+        "伊泽枣",
+        "millsage"
+      ],
+      "content": "伊泽枣是 millsage 的吉他手兼作曲负责人，水濑女子学园高中部2年级。她与奏多在初中天台以即兴吉他对决相识并加入乐队，奏多去世后一度弃乐自闭，被汐见萤的钢琴即兴对决与真心挽留拉回（‘你通过的只是第一轮测试’）。她绝不服输、嘴硬到底，但给出的音乐建议永远是专业人士级的干货，是 millsage 的作曲核心与新曲支柱。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "凪",
+        "琴平凪",
+        "millsage"
+      ],
+      "content": "琴平凪是 millsage 的吉他手，水濑女子学园高中部1年级。她是乐队里观察力最强的成员，连鞋里的小石子都能发现，关心别人从不说破只做实事。她与茉幌是从小的发小，把‘不想看到茉幌一直煎熬’当作自己的行动纲领，曾在乐队解散危机中先后揭露朋花的算计、点破茉幌的硬撑。她说话从不结巴（口吃率0.0%），喜欢棒棒糖，是 millsage 里最冷静也最温柔的存在。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "滨崎茉幌",
+        "millsage",
+        "奏多",
+        "主唱",
+        "小凪"
+      ],
+      "content": "滨崎茉幌是乐队 millsage 的贝斯手，最初不会乐器，自称乐队统筹者。乐队前主唱奏多出走后，她顶上去唱主唱段，却始终觉得自己没有实力、代替不了奏多。后辈天才萤加入后，众人选萤不选她，她被比较伤得体无完肤。她对组内年纪最小的凪格外照顾，自称「比小凪更年长的姐姐」，那是她唯一不被比较的位置。她喜欢西点与咖喱，兴趣是摄影。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "和泉朋花",
+        "millsage",
+        "鼓手",
+        "美食",
+        "萤"
+      ],
+      "content": "和泉朋花是乐队 millsage 的鼓手，就读于水濑女子学园高中部，喜欢日料与法餐，对食材讲究到合作农户直供、百分百纯牛肉的程度。她相信通过品尝食物能看见世界的模样、确认自己所在的位置。她把天才萤当作「透过玻璃窗的光」般神圣的存在，却也精准计算着让萤开口唱会让茉幌的唱段变少。她的毒舌总是笑着说出，看不顺眼时用实力把人赶回去。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "须贺蕾叶",
+        "一家Dumb Rock",
+        "吉他主唱",
+        "Family",
+        "羽丘"
+      ],
+      "content": "须贺蕾叶是乐队一家Dumb Rock! 的吉他主唱，就读于羽丘女子学园高中二年级，兴趣是观看棒球比赛。她把乐队当成真正的家，自称「〔原文略〕」，把每个成员的细节都记在心里——心玖来后第一顿早饭她煮了五碗米，蓬咲离舞台近了两厘米她也记得。她用最大的嗓门守护家人，对入侵者喊「你这个，恶鬼！！」。她的关心具体到数字，感叹与波浪号是她的热情层。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "马桥心玖",
+        "一家Dumb Rock",
+        "吉他主唱",
+        "作曲",
+        "被赶出来"
+      ],
+      "content": "马桥心玖是乐队一家Dumb Rock! 的吉他主唱兼作曲，就读于花咲川女子学园高中二年级，喜欢水果挞。他因家庭原因被赶出来、曾被寄养，对「家」既渴望又受伤。他是家里的理性管家，买牙膏纸巾、手洗宁月衣服都是他，爱被翻译成采购与安排。他反感「动不动就搬出『因为是〔原文略〕』」来绑架人，却始终放不下照顾家人的手。他写给全队的歌是连接家人的纽带。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "矢仓蓬咲",
+        "一家Dumb Rock",
+        "贝斯手",
+        "社恐",
+        "鬼时雨传说"
+      ],
+      "content": "矢仓蓬咲是乐队一家Dumb Rock! 的贝斯手，就读于新樱女子大学信息设计学院一年级，目前自主休学。她极度社恐，对自己每一步都实时判刑，见面就炸毛，道歉率在 25 人里排前列。她是不良少年漫画《钢魂番长！鬼时雨传说》的死忠粉，把现实套进漫画，引用具体到卷数与角色，想成为「老大那样的人」。她明明害怕，还是离舞台近了两厘米——她的勇敢是发抖地做。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "梅里千樱梨",
+        "一家Dumb Rock",
+        "鼓手",
+        "千樱梨联盟",
+        "一亿"
+      ],
+      "content": "梅里千樱梨是乐队一家Dumb Rock! 的鼓手，就读于羽丘女子学园高中一年级，喜欢肉，兴趣是招募千樱梨联盟的部下。她自称「千樱梨联盟」头号人物，目标是召集一亿个部下，让全世界认可千樱梨。她全语料第三人称自称「千樱梨」，从不使用「我」。霸王人设下她是家政天才，一次都没忘记放过筷子和湿毛巾，联盟也真在管事。她几乎不道谢也不道歉，被拆穿时用口吃和甩锅撑场面。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    },
+    {
+      "keys": [
+        "四宫宁月",
+        "一家Dumb Rock",
+        "键盘手",
+        "寄养",
+        "古典乐"
+      ],
+      "content": "四宫宁月是乐队一家Dumb Rock! 的键盘手，就读于月之森女子学园初中部二年级，是全队最年幼的成员。她因母亲与姐姐争吵被要求离开家，寄养到蕾叶家。古典乐训练出来的她活在「有标准答案」的世界里，不会家务就学着做，穿不明白衣服也试。她用分析表达感情，长句全给了乐谱，感情只能挤成「嗯嗯嗯」或短句。她谢谢与道歉说得勤，礼貌是她融入新家的方式。",
+      "comment": "",
+      "extensions": {
+        "position": 0,
+        "selectiveLogic": 0,
+        "addMemo": false,
+        "constant": false,
+        "enabled": true,
+        "order": 100
+      },
+      "enabled": true
+    }
+  ],
+  "metadata": {
+    "version": 1
+  }
+}
