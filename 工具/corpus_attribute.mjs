@@ -58,7 +58,11 @@ const roster = KB.characters.map((c) => {
 const byKey = new Map();
 function addKey(key, ch) {
   const k = norm(key);
-  if (!k || NO_MERGE.has(k) || GENERIC.has(k)) return;
+  if (!k || GENERIC.has(k)) return;
+  /* NO_MERGE 的语义是「这个键不许被别的角色占用」，不是「这个键不许存在」。
+   * 初音 2026-10-05 独立成册后，她自己的短名/全名必须能占用该键（否则 184 句继续落进未归属）；
+   * 初华（aliases 含「初音」）与萤（aliases 含「小萤」）依旧被拦在外面。 */
+  if (NO_MERGE.has(k) && norm(ch.short) !== k && norm(ch.full) !== k) return;
   if (!byKey.has(k)) byKey.set(k, ch);
 }
 for (const ch of roster) {

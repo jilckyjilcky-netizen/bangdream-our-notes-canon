@@ -57,8 +57,8 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
 
   const stats = await tools.stats.run({});
   show('stats（截断）', { meta: stats.meta, totals: stats.totals, 缺口: stats.缺口, 抽样偏差说明: stats.台词库抽样偏差.说明, 明显偏差: stats.台词库抽样偏差.明显偏差.slice(0, 6) });
-  ok(stats.totals.角色 === 30, 'stats 总数 30 人');
-  ok(stats.缺口.模型文档不存在.length === 0, 'stats：25 人模型文档全部存在');
+  ok(stats.totals.角色 === 47, `stats 总数 47 人（2026-10-05 新增 薇欧拉 + 16 名主线相关 NPC）`);
+  ok(stats.缺口.模型文档不存在.length === 0, 'stats：47 份模型文档全部存在');
 
   show('world: 抹茶（检索）', await tools.world.run({ q: '抹茶', top_k: 3 }));
   show('world: 场所全列', await tools.world.run({ kind: '场所' }));
@@ -103,9 +103,20 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
 
   const wbIndex = await tools.worldbook.run({});
   show('worldbook: 目录（截断）', { 文件: wbIndex.文件, 词条数: wbIndex.词条数, 前3条: wbIndex.词条.slice(0, 3) });
-  ok(wbIndex.词条数 === 50, `worldbook 目录 ${wbIndex.词条数} 条`);
+  ok(wbIndex.词条数 === 66, `worldbook 目录 ${wbIndex.词条数} 条`);
   const wbMana = await tools.worldbook.run({ q: '真奈' });
   ok(wbMana.命中 > 0 && !!wbMana.词条?.[0]?.内容, 'worldbook 能查到 真奈（2026-10-04 新增词条）');
+  const wbViola = await tools.worldbook.run({ q: '薇欧拉' });
+  ok(wbViola.命中 > 0 && !!wbViola.词条?.[0]?.内容, 'worldbook 能查到 薇欧拉（2026-10-05 新增词条）');
+  /* 2026-10-05 第二批入册的 16 名主线相关 NPC，每人都要有世界书词条，
+   * 否则「角色在 kb 里查得到、在世界里查不到」——即上批薇欧拉踩过的坑。 */
+  const NPC16 = ['奏多', '初音', '铃木', '蕾叶的祖母', '小春', '南', '波波', '蓓儿', 'Raki', '波塔', '小萤', '柚衣奈', '心玖的母亲', '枫', '歌美', '宁月的管家婆婆'];
+  const wbMiss = [];
+  for (const n of NPC16) {
+    const r = await tools.worldbook.run({ q: n });
+    if (!(r.命中 > 0 && !!r.词条?.[0]?.内容)) wbMiss.push(n);
+  }
+  ok(wbMiss.length === 0, `worldbook 覆盖全部 16 名新增 NPC${wbMiss.length ? `（缺：${wbMiss.join('、')}）` : ''}`);
   const wbHit = await tools.worldbook.run({ q: 'MyGO' });
   show('worldbook: q=MyGO', { 命中: wbHit.命中, 首条: wbHit.词条?.[0] && { 标题: wbHit.词条[0].标题, 关键词: wbHit.词条[0].关键词, 内容前80: String(wbHit.词条[0].内容).slice(0, 80) } });
   ok(wbHit.命中 > 0 && !!wbHit.词条[0].内容, 'worldbook 按关键词命中并返回正文');
@@ -122,12 +133,42 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
   const manaSkill = await tools.skill.run({ name: '真奈', part: 'all' });
   ok(manaSkill.id === 'mana' && !!manaSkill.parts?.skill && !!manaSkill.parts?.lines && !!manaSkill.parts?.lore,
     'skill 取到 真奈 的 人设skill/mana/（SKILL.md + lines + lore）');
+  const violaPrompt = await tools.doc.run({ name: '薇欧拉', kind: 'prompt' });
+  ok(violaPrompt.kind === 'prompt' && violaPrompt.总字数 > 500 && !violaPrompt.truncated, 'doc kind=prompt 取到 薇欧拉 系统提示词全文');
+  const violaSkill = await tools.skill.run({ name: '薇欧拉', part: 'all' });
+  ok(violaSkill.id === 'viola' && !!violaSkill.parts?.skill && !!violaSkill.parts?.lines && !!violaSkill.parts?.lore,
+    'skill 取到 薇欧拉 的 人设skill/viola/（SKILL.md + lines + lore）');
+
+  /* 主角级新增 NPC（语料 ≥75 句）5 人：系统提示词 + 人设 skill 双全。
+   * 薄样本 11 人按口径不出卡/skill，但提示词与模型文档必须有——下面单独断言。 */
+  const LEAD5 = [['奏多', 'kanata'], ['初音', 'hatsune'], ['铃木', 'suzuki'], ['蕾叶的祖母', 'baachan'], ['小春', 'koharu']];
+  for (const [nm, sid] of LEAD5) {
+    const p = await tools.doc.run({ name: nm, kind: 'prompt' });
+    ok(p.kind === 'prompt' && p.总字数 > 500 && !p.truncated, `doc kind=prompt 取到 ${nm} 系统提示词全文`);
+    const s = await tools.skill.run({ name: nm, part: 'all' });
+    ok(s.id === sid && !!s.parts?.skill && !!s.parts?.lines && !!s.parts?.lore,
+      `skill 取到 ${nm} 的 人设skill/${sid}/（SKILL.md + lines + lore）`);
+  }
+  /* 薄样本 11 人：不出卡/skill，但系统提示词必须全员齐备 */
+  const THIN11 = ['南', '波波', '蓓儿', 'Raki', '波塔', '小萤', '柚衣奈', '心玖的母亲', '枫', '歌美', '宁月的管家婆婆'];
+  const thinMiss = [];
+  for (const nm of THIN11) {
+    const p = await tools.doc.run({ name: nm, kind: 'prompt' });
+    if (!(p.kind === 'prompt' && p.总字数 > 300 && !p.truncated)) thinMiss.push(nm);
+  }
+  ok(thinMiss.length === 0, `16 名新增 NPC 的系统提示词齐备（薄样本 11 人只出提示词与模型文档）${thinMiss.length ? `（缺：${thinMiss.join('、')}）` : ''}`);
 
   const stats2 = await tools.stats.run({});
   show('stats: 检索后端 + 文本资产', { 检索后端: stats2.检索后端, 文本资产: stats2.文本资产 });
   ok(!!stats2.检索后端?.模式, 'stats 自述检索后端（Ollama 未起时会给出恢复命令）');
-  ok(stats2.文本资产.角色卡 === 30 && stats2.文本资产.世界书词条 === 50, 'stats 盘点文本资产（30 卡 / 50 词条）');
-  ok(stats2.文本资产.系统提示词 === 26, `stats 盘点系统提示词 ${stats2.文本资产.系统提示词} 份（含 真奈）`);
+  ok(stats2.文本资产.角色卡 === 36 && stats2.文本资产.世界书词条 === 66, 'stats 盘点文本资产（36 卡 / 66 词条）');
+  ok(stats2.文本资产.系统提示词 === 43, `stats 盘点系统提示词 ${stats2.文本资产.系统提示词} 份（含 真奈、薇欧拉 + 16 名新增 NPC）`);
+  ok(stats2.文本资产.模型文档 === 47, `stats 盘点模型文档 ${stats2.文本资产.模型文档} 份（与 47 人一一对应）`);
+  const skillsAll = await tools.skills.run({});
+  ok(skillsAll.总数 === 32 && skillsAll.skills?.length === 32, `skills 目录列出 ${skillsAll.总数} 套人设 skill`);
+  const NEW_SKILL_IDS = ['kanata', 'hatsune', 'suzuki', 'baachan', 'koharu'];
+  ok(NEW_SKILL_IDS.every(id => skillsAll.skills.some(s => s.id === id)),
+    `skills 目录含 5 套新增 NPC skill（${NEW_SKILL_IDS.join('/')}）`);
 
   /* ---------- 回归断言（v1.0 / v1.1 的 bug 不再复现） ---------- */
   ok(WAVE_CHARS.length > 3 && !WAVE_CHARS.every(n => ['若麦', '爱音', '爽世'].includes(n)),

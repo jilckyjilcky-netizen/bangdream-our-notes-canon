@@ -48,6 +48,16 @@ const HAN = /^[\u3400-\u9fff\u3005\u3006\uf900-\ufaff]$/;
 const SEPARATORS = /[\s\u00a0\u3000\u30fb\u00b7\u2027\u2022・·、，,。.．;；:：!！?？"'“”‘’（）()【】\[\]{}<>《》「」『』/／\\|｜~〜～\-—–_+=*#@&^%$`]+/g;
 
 /**
+ * 关系型别名（"祥子之父""乐奈的外婆""小初的搭档"）：整串查询时是好键（有人就这么找人），
+ * 但它是**描述不是名字** —— 不许参与子串匹配。
+ * 否则丰川家补进库后，单字「祥」会从 祥子 歧化到 清告(祥子之父)/定治(祥子祖父)
+ * （2026-10-05 跑 `node mcp-canon/_test-names.mjs` 实测复现）。
+ */
+/* 关系词表：命中即视为「描述」而非名字。既收 "祥子之父"，也收 "祥子祖父"（kb.aliases 两种写法都有）。
+   只影响子串匹配；整串查询（有人真会打「祥子之父」找人）走 tier 0 精确键，不受影响。 */
+const REL_ALIAS = /之父|之母|祖父母|外祖父母|祖父|祖母|外婆|外公|奶奶|女婿|儿媳|儿子|女儿|孙女|孙子|哥哥|弟弟|姐姐|妹妹|爸爸|妈妈|搭档|家长|家主|岳父|岳母/;
+
+/**
  * 手写补充字对：**只放数据推导不到的**。
  *  · 和制新字体（日本新字体与中文简繁都不同形）：沢→泽、浜→滨、桜→樱、広→广、辺→边、
  *    斉→齐、姫→姬、曽→曾、増→增、恵→惠、徳→德
@@ -130,15 +140,15 @@ export function createCharResolver({
   const fold = { ...deriveFoldPairs(aliasDoc), ...manualFold };
   const norm = makeNormalizer(fold);
 
-  /** key -> [{ char, tier, via }]，同一角色同一 key 只留最权威的一条。 */
+  /** key -> [{ char, tier, via, weak }]，同一角色同一 key 只留最权威的一条。 */
   const entries = new Map();
-  const add = (char, raw, tier, via) => {
+  const add = (char, raw, tier, via, weak = false) => {
     const key = norm(raw);
     if (!key) return;
     const list = entries.get(key) || [];
     if (list.some((e) => e.char === char && e.tier <= tier)) return;
     const i = list.findIndex((e) => e.char === char);
-    if (i >= 0) list[i] = { char, tier, via }; else list.push({ char, tier, via });
+    if (i >= 0) list[i] = { char, tier, via, weak }; else list.push({ char, tier, via, weak });
     entries.set(key, list);
   };
 
@@ -153,7 +163,7 @@ export function createCharResolver({
     /* tier 0 · 主键 */
     add(c, c.id, 0, 'id');
     add(c, c.name_short, 0, '简称');
-    for (const a of c.aliases || []) add(c, a, 0, '别名');
+    for (const a of c.aliases || []) add(c, a, 0, '别名', REL_ALIAS.test(a));
     /* tier 1 · 全名与舞台名 */
     add(c, c.name, 0, 'kb.name');                       // "初华（Doloris / Uika Misumi）"
     add(c, row.real, 1, '全名(中文)');
@@ -210,16 +220,21 @@ export function createCharResolver({
     const contained = [];
     for (const [k, list] of entries) {
       if (k.length < 2 || !key.includes(k)) continue;
-      const strong = list.filter((e) => e.tier !== 2);
+      const strong = list.filter((e) => e.tier !== 2 && !e.weak);
       if (strong.length) contained.push([k, strong]);
     }
     if (contained.length) {
       const max = Math.max(...contained.map(([k]) => k.length));
       return found(contained.filter(([k]) => k.length === max).flatMap(([, list]) => list), 3, '子串(输入包含键)');
     }
-    /* 3) 键里含有输入（"祥" → 祥子）；一旦跨角色就报歧义 */
-    const hits = [];
-    for (const [k, list] of entries) if (key.length >= 1 && k.includes(key)) hits.push(...list);
+    /* 3) 键里含有输入（"祥" → 祥子）；一旦跨角色就报歧义。
+     *    关系型别名（weak，如 祥子之父）只在名字键全落空时才兜底，
+     *    否则丰川家入库后单字「祥」会被 清告/定治 歧化（2026-10-05 _test-names 实测）。 */
+    let hits = [];
+    for (const [k, list] of entries) if (key.length >= 1 && k.includes(key)) hits.push(...list.filter((e) => !e.weak));
+    if (!hits.length) {
+      for (const [k, list] of entries) if (key.length >= 1 && k.includes(key)) hits.push(...list);
+    }
     if (hits.length) return found(hits.map((e) => ({ ...e, tier: 3, via: '子串' })));
     return null;
   }

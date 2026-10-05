@@ -7,8 +7,13 @@
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { WS } from './_root.mjs';
+import { CHARS, EXTRA_CHARS } from './角色表.mjs';
 
 const OUT = join(WS, '角色卡');
+/* 角色卡文件名一律用**全名**（既有 31 张卡即如此：三角初华_character_card.json）。
+ * 2026-10-05 新增 NPC 里 奏多/初音 的 key 是简称，直接用 c.key 会生成 奏多_character_card.json，
+ * 与 audit_models 的 `角色卡/<full>_character_card.json` 判定错位 → 明明有卡却报缺口。故统一取全名。 */
+const FULL_OF = new Map([...CHARS, ...EXTRA_CHARS].map(c => [c.k, c.full]).filter(([, f]) => f));
 /* 模型文档按乐队分目录（2026-09-26 合并后）——下面 10 张卡是手写的，没有 band/short 字段，故用映射。
  * 顺带修一个既有 bug：原路径写成 `角色模型/10人/<全名>_角色扮演模型.md`，
  * 而真实文件名带短名前缀（`灯_高松灯_角色扮演模型.md`），10 张卡的 model_doc 一直是错的。 */
@@ -162,7 +167,7 @@ for (const c of allChars) {
       extensions: { language: 'zh-Hans', data_source: 'Our Notes 剧本 e36a8be5d83e', model_doc: docPath }
     }
   };
-  const file = join(OUT, c.key + '_character_card.json');
+  const file = join(OUT, (FULL_OF.get(c.key) || c.key) + '_character_card.json');
   if (DRY) { console.log('[dry] ' + file); continue; }
   writeFileSync(file, JSON.stringify(card, null, 2), 'utf8');
   console.log('已生成 ' + file + '  (' + Buffer.byteLength(JSON.stringify(card), 'utf8') + ' bytes)');

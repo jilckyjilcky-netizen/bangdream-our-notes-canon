@@ -2,11 +2,11 @@
 
 把本工作区里**可检索的文本层**暴露成 **MCP（Model Context Protocol）工具**，供 DSH 或任何 MCP 客户端调度。
 
-- **作品**：BanG Dream! Our Notes —— MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock，共 **25 人**
+- **作品**：BanG Dream! Our Notes —— MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock，共 **25 名乐队角色**；库内实际登记 **47 人**（25 名乐队成员 + Sumimi 真奈 + 妖精花束薇欧拉 + NPC，**其中 16 名主线相关 NPC 于 2026-10-05 第二批入册**；`who` / `speech` 都对这 47 人打分与排名）
 - **语义检索**：**推荐用本地 Ollama** 做向量检索（数据不出本机、零 API 费用）；不装也能用，自动降级为纯词汇检索并在结果里说明
 - **两条传输**：**stdio**（DSH 默认注册的方式）与 **streamable-http**（`http://127.0.0.1:8787/mcp`，与 `MYGO_MCP` 同形态）
   —— 同一份协议层 + 同一份工具实现，见「## 两条传输：stdio 与 HTTP」
-- **当前版本 v1.4**：协议层抽到 `canon-mcp-core.mjs` + 协议版本按客户端协商 + 新增 streamable-http 传输（15 个工具不变）
+- **当前版本 v1.5.0**：协议层抽到 `canon-mcp-core.mjs` + 协议版本按客户端协商 + 新增 streamable-http 传输；v1.5 起接管人设 skill（新增 `skill` / `skills`），**17 个工具**
 - **v1.3 名字索引**：所有收 `name` 的工具现在都认**中日全名 / 只写姓 / 只写名 / 舞台名 / 罗马音 / 简繁与和制汉字**（`三角初华`、`三角`、`三角 初華`、`Doloris`、`ドロリス`、`Uika Misumi`、`Misumi Uika`）。详见「## v1.3 更新了什么」
 
 ## 已注册
@@ -14,8 +14,8 @@
 | 项 | 值 |
 |---|---|
 | 服务端名 | `canon`（DSH project 级，stdio）—— 工具全名形如 `mcp__canon__char` |
-| 协议身份 | `canon-notes-kb` v1.4.0（`initialize` 时返回，含 title） |
-| 加载状态 | `loader on:active，15 个工具`（`mcp_manager_list` 可查） |
+| 协议身份 | `canon` v1.5.0（`initialize` 实跑返回，含 title《BanG Dream! Our Notes 资料库》） |
+| 加载状态 | `loader on:active，17 个工具`（`mcp_manager_list` 可查） |
 | 改代码后 | 必须 **重启加载器**（`mcp_manager_restart`）才生效；工具清单会热更新到当前会话 |
 
 > **从 v1.1 迁移**：旧的 `kb_*` 调用名仍可用（服务端保留 `kb_char → char` 的兼容映射），
@@ -69,7 +69,7 @@ node mcp-canon/canon-mcp-http.mjs      # 前台，Ctrl+C 停止
 
 ### 注册进 DSH
 
-stdio（现状，二选一，别同时开两份 15 工具）：
+stdio（现状，二选一，别同时开两份 17 工具）：
 
 ```
 mcp_manager_add(serverName=canon, transport=stdio, command=node, args=<...>\mcp-canon\canon-mcp-server.mjs)
@@ -81,7 +81,7 @@ HTTP（与 `MYGO_MCP` 同形态；**要先起服务**，否则该条目连不上
 mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.1:8787/mcp, level=project)
 ```
 
-> 两个都注册会让同名 15 个工具出现两遍（`mcp__canon__*`），日常只留一个。
+> 两个都注册会让同名 17 个工具出现两遍（`mcp__canon__*`），日常只留一个。
 
 ### 传输层实现要点
 
@@ -98,19 +98,25 @@ mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.
 
 | 资产 | 数量 | 对应工具 |
 |---|---|---|
-| 角色档案（事实/性格内核/关系/状态机/语言指纹/OOC 红线） | 25 人 | `char` `rel` `state` `speech` |
-| 代表性台词库 | 256 句 | `quote` `sample` |
+| 角色档案（事实/性格内核/关系/状态机/语言指纹/OOC 红线） | 47 人 | `char` `rel` `state` `speech` |
+| 代表性台词库 | 1271 句 | `quote` `sample` |
 | 事件 / 场所 / 物件 | 14 / 7 / 7 | `event` `world` |
-| **SillyTavern V2 角色卡**（含 first_mes / mes_example / 可导入） | **25 张** | **`card`** |
-| **世界书词条** | **49 条** | **`worldbook`** |
-| **完整《角色扮演模型》长文** | 25 份 | **`doc`** |
-| **可直接粘贴的系统提示词** | 25 份 | **`doc`（kind=prompt）** |
+| **SillyTavern V2 角色卡**（含 first_mes / mes_example / 可导入） | **36 张** | **`card`** |
+| **世界书词条** | **66 条** | **`worldbook`** |
+| **完整《角色扮演模型》长文** | 47 份 | **`doc`** |
+| **可直接粘贴的系统提示词** | 43 份 | **`doc`（kind=prompt）** |
+| **聊天用人设 skill**（SKILL.md / lines / lore / yaml） | 32 套 | **`skill` `skills`** |
+
+> **为什么 47 人只有 36 张卡 / 32 套 skill**：后入册的 16 名 NPC 里，只有语料 ≥75 句的 **5 名主角级**
+> （奏多 / 初音 / 铃木 / 蕾叶的祖母 / 小春）出角色卡与人设 skill；其余 **11 名薄样本**（南、波波、蓓儿、Raki、
+> 波塔、小萤、柚衣奈、心玖的母亲、枫、歌美、宁月的管家婆婆，语料 12~42 句）只进数据层 + 模型文档 + 系统提示词——
+> 用 n=17 的统计去驱动"怎么说"会造出假指纹。他们的模型文档顶部均标注「指标仅作扮演参考」。
 
 **拿不到（有意不接入，按需再加）**：游戏原始表 `masterdata/`、剧本原文 `素材全量/`（按话/按角色）、
 `.cache/script` 抓取缓存、`角色模型/提取`（签名时刻）与 `主线`、订单队列产出、任何图片/音频素材。
 需要这些就得按路径直接读文件——**MCP 只覆盖"结构化 + 可直接投喂 LLM 的文本"**。
 
-## 工具一览（15）
+## 工具一览（17）
 
 | 工具 | 参数 | 说明 |
 |---|---|---|
@@ -119,16 +125,18 @@ mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.
 | `rel` | a, b | 双向关系（称呼 + 温度；语料无交集会如实标注） |
 | `event` | q, top_k? | 事件检索（集数/参与者/摘要/关键词） |
 | `quote` | q?, by?, top_k? | 台词检索；`by` 限定说话人，语义未命中时回退该角色台词库的词汇匹配 |
-| `who` | text（字符串**或数组**/多行）, top_k? | 「这句是谁说的」——语言指纹偏差分，全 25 人排序；**多句比单句明显更准** |
+| `who` | text（字符串**或数组**/多行）, top_k? | 「这句是谁说的」——语言指纹偏差分，全 47 人排序；**多句比单句明显更准** |
 | `speech` | name? / names[]? / metric? / order? / top_k? | 语言指纹：单人 16 项明细、按指标全库排名、2~5 人并排（附差异最大指标） |
 | `state` | name? / q? | 状态机：状态名/触发 keys/该状态下的说话方式；`q` 跨角色搜 |
 | `stats` | name? | 资料库体检：**检索后端**、文本资产盘点、缺失指标、模型文档存在性、缺口清单、台词库抽样偏差 |
 | `world` | q? / kind? / top_k? | 场所 / 物件查询 |
 | `sample` | name, n?, seed? | 抽该角色真实台词 N 句（同 seed 可复现）——扮演测试 / 盲测出题 |
 | `card` | name, max_chars? | **SillyTavern V2 角色卡原字段**（description/personality/scenario/first_mes/mes_example/system_prompt/alternate_greetings/tags…） |
-| `worldbook` | q?, top_k? | **世界书词条**：不带 q 回目录（49 条），给词或 uid 取正文 |
+| `worldbook` | q?, top_k? | **世界书词条**：不带 q 回目录（66 条），给词或 uid 取正文 |
 | `doc` | name, kind?（model\|prompt）, max_chars? | **完整《角色扮演模型》**（≤6 万字）或**系统提示词**（≤2 万字） |
 | `list` | type? | 清单（角色/事件/场所/物件） |
+| `skill` | name, part?（skill\|lines\|lore\|yaml\|all）, max_chars? | **聊天用人设 skill 全文**：从 `人设skill/` 取 SKILL.md / 台词语料库 / 背景考据 / UI 元数据 |
+| `skills` | band? | **人设 skill 清单**：32 套 skill 的 id/角色/乐队/招牌机制，`band` 可按乐队过滤 |
 
 ## 推荐：用本地 Ollama 做向量检索
 
@@ -199,7 +207,7 @@ ollama pull qwen3-embedding:0.6b
 - 未命中时给**最像的几个**候选 + 可用写法 + 乐队名提示（`Ave Mujica` → 成员名单），不再把 25 个人名整份倒出来
 - 命中路径会回显在 `char._命中`（如 `全名(中文)` / `姓(中文)` / `舞台名`），便于排查
 
-**测试**：`node mcp-canon/_test-names.mjs` —— 91 条名字形态 + 25 人全量（中文全名/日文全名/只写姓）
+**测试**：`node mcp-canon/_test-names.mjs` —— 110 条名字形态 + 25 人全量（中文全名/日文全名/只写姓）
 + 工具端到端 + 歧义与未知名的如实回报，全部离线（不需要 Ollama）。
 
 ## v1.2 更新了什么
@@ -267,7 +275,7 @@ v1.0 遇到多句会崩（把整段汉字数当"句长均值"），回测 top1 �
 ## 手动启动 / 测试
 
 ```bash
-# 工具层冒烟：15 个工具 + 断言全跑（不需要 spawn）
+# 工具层冒烟：17 个工具 + 断言全跑（不需要 spawn）
 node mcp-canon/_test-tools.mjs
 
 # 中日姓名索引回归（91 条名字形态 + 25 人全量，纯离线）
@@ -284,7 +292,7 @@ node mcp-canon/_test-http.mjs
 
 # 起 HTTP 服务后可直接 curl / PowerShell 打（都不是 MCP 协议的一部分，只是顺手）
 #   GET  /health                          → {ok,server,tools,...}
-#   GET  /tools                           → 15 个工具的 schema
+#   GET  /tools                           → 17 个工具的 schema
 #   POST /call  {"name":"char","arguments":{"name":"初华"}}
 node mcp-canon/canon-mcp-http.mjs
 

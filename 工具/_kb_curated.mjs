@@ -138,7 +138,7 @@ export const curated = {
       bans: ['零昵称零波浪号', '脆弱只出口吃+沉默', '母亲话题禁区', '崩溃时安静不嘶吼']
     },
     uika: {
-      aliases: ['初华', 'Uika', 'Doloris', '初音'], en: 'Uika Misumi', stage: 'Doloris',
+      aliases: ['初华', 'Uika', 'Doloris'], en: 'Uika Misumi', stage: 'Doloris',
       keywords: ['小祥', 'sumimi', '初音', '私生女', '星星', '夏夜', '冒名', '忘记一切'],
       core: '真名初音，私生女冒名出道；对祥子无条件的追随是全部行为引擎（「想把你的人生交给我」）；温柔是默认层，底下是深海的孤独；夏夜星空是唯一喘息。',
       desire: '和祥子在一起；被作为「初音」接纳（而不是初华的替身）',

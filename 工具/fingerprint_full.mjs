@@ -11,13 +11,15 @@
  * 差异只有三点：① 语料是全量归属产物；② 显式输出 疑问率/感叹率（build_kb.parseFingerprint 直接取值）；
  * ③ 呼称表扩为 30 人「小X」全集（不影响 who 打分维度）。
  *
- * 用法：node 工具/fingerprint_full.mjs [--dry]
+ * 用法：node 工具/fingerprint_full.mjs [--dry] [--dump] [--口径=行|条目]
+ *   --dump 只把 rows 以 JSON 打到 stdout、绝不写盘（供审计脚本取两种口径真值）
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { WS } from './_root.mjs';
 
-const DRY = process.argv.includes('--dry');
+const DUMP = process.argv.includes('--dump');
+const DRY = process.argv.includes('--dry') || DUMP;
 const DENSE_DIR = join(WS, '素材全量', '按角色全量', 'zh-Hans');
 const FP_DIR = join(WS, '角色模型', '指纹');
 const KB = JSON.parse(readFileSync(join(WS, '资料库', 'kb.json'), 'utf8'));
@@ -284,6 +286,32 @@ for (const ch of roster) {
     感叹率: pctOf(st.标记率['感叹率']),
     口吃率: pctOf(st.标记率['单字重复口吃(小、小)']),
     呼称小X率: pctOf(st.标记率['呼称「小X」']),
+    // 以下为 文档/_数字口径审计 需要的补列：全部由既有 PATTERNS/句长 直接派生，
+    // 不进 renderReport，故不改变已生成的 角色模型/指纹/ 报告内容
+    中位数: st.句长.中位数, 最长: st.句长.最长,
+    '≥25字占比': pctOf(st.句长['≥25字占比']),
+    含我率: pctOf(st.标记率['含「我」']),
+    以省略号结尾率: pctOf(st.标记率['以…结尾']),
+    以问结尾率: pctOf(st.标记率['以？结尾']),
+    以叹结尾率: pctOf(st.标记率['以！结尾']),
+    叠词率: pctOf(st.标记率['叠词(好难受，好难受)']),
+    吗呢吧结尾率: pctOf(st.标记率['含疑问「吗/呢/吧」']),
+    含谢谢率: pctOf(st.标记率['含「谢谢」']),
+    含抱歉率: pctOf(st.标记率['含「对不起/抱歉」']),
+    沉默配额: pctOf(pct(st.silent.length + st.silentP.length, st.items.length)),
+    // 波浪号有三种历史写法（2026-10-05 实测，见 角色模型/_数字口径审计.md 第四节）：
+    //   「N 句」绝大多数 = 台词行**结尾**是～的句数（条目合并算一条）
+    //   爱音「全语料 183 句」 = **含**～的全量条目数（含歌词/思考）
+    //   海铃「仅一处」      = 含～（不按结尾）
+    // 三个真值列都算出来，由审计工具按文档写法择一比对，避免把定义分歧误判成孤儿。
+    波浪号率: pctOf(pct(count(st.speech, /～|~/), st.N)),
+    波浪号句数: count(st.speech, /～|~/),
+    波浪号结尾句数: count(st.speech, /[～~]\s*$/),
+    波浪号结尾率: pctOf(pct(count(st.speech, /[～~]\s*$/), st.N)),
+    全语料含波浪号句数: count(st.items, /～|~/),
+    请字率: pctOf(pct(count(st.speech, /请/), st.N)),
+    双叹号句数: count(st.speech, /！！/),
+    沉默句数: st.silent.length,
   });
   if (!DRY) writeFileSync(join(FP_DIR, `${ch.base}_语言指纹报告.md`), renderReport(ch, st), 'utf8');
 }
@@ -330,7 +358,9 @@ for (const r of sorted) {
 T.push('');
 if (!DRY) writeFileSync(join(WS, '角色模型', '_全角色指纹对比.md'), T.join('\n'), 'utf8');
 
-if (DRY) {
+if (DUMP) {
+  console.log(JSON.stringify({ 口径: DENSE_MODE, rows }));
+} else if (DRY) {
   console.log(`[dry] 可重算角色 ${rows.length}/30 ｜ 跳过 ${skipped.length}`);
   console.log('id | 短名 | 条数 | 台词 | 均长 | 省略号率 | 疑问率 | 感叹率 | 沉默占比');
   for (const r of rows) console.log([r.id, r.short, r.条数, r.台词, fmt(r.均长), fmt(r.省略号率), fmt(r.疑问率), fmt(r.感叹率), fmt(r.沉默占比)].join(' | '));
