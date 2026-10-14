@@ -181,9 +181,35 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
   ok(whoWave('祥子')?.expect === false && whoWave('祥子')?.语料率 === 0,
     '祥子的波浪号语料率登记为 0% ⇒ expect=false（v1.1 的误判已修）');
   ok(SPEECH_METRICS.length === 16, `指标清单 16 项（含「疑问率」，v1.0 曾因正则匹配不到而缺失）`);
-  /* 工具数：v1.2 是 15、v1.5 加 skill/skills → 17。断言写成"清单与实现一致"而不是死数字，
-   * 免得每次加工具都要回来改测试（旧断言死在 15 上，见 git 30815ed）。 */
-  const TOOL_NAMES = ['list', 'char', 'rel', 'event', 'quote', 'search', 'who', 'speech', 'state', 'stats', 'world', 'sample', 'card', 'worldbook', 'doc', 'skill', 'skills'];
+  /* ---------- v1.5 action / v1.6 motion：Live2D 演出编排 ---------- */
+  const actM = await tools.action.run({ model: 'mortis', top: 3 });
+  show('action: mortis 情绪→动作谱', { model: actM.model, 角色: actM.角色, keys: Object.keys(actM.情绪到动作矩阵 || actM.情绪到动作_厚 || {}) });
+  const actMatrix = actM.情绪到动作矩阵 || actM.情绪到动作_厚;
+  ok(!!actMatrix && Object.keys(actMatrix).length > 0, 'action 返回 mortis 的情绪→动作矩阵（v1.5 起在册，勿再漏）');
+
+  const mo1 = await tools.motion.run({ model: 'uika', exp: 'exp_sad01', top: 5, lines: 3 });
+  show('motion: 初华 × exp_sad01', { 角色: mo1.角色, exp: mo1.exp, valence: mo1.valence, arousal: mo1.arousal, motions: mo1.motions?.slice(0, 3), example_lines: mo1.example_lines });
+  ok(mo1.model === 'uika' && mo1.exp === 'exp_sad01' && Array.isArray(mo1.motions) && mo1.motions.length > 0, 'motion 按 model+exp 返回 top 动作');
+  ok(mo1.motions.every(m => ['L', 'C', 'R'].includes(m.dir)), 'motion 每个动作都标了朝向 _L/_C/_R');
+  ok(typeof mo1.valence === 'number' && typeof mo1.arousal === 'number', 'motion 附带该 exp 的 valence/arousal（来自 emotion_polarity）');
+  ok(mo1.example_lines.length > 0 && mo1.example_lines.every(l => typeof l.text === 'string' && typeof l.配推荐动作 === 'boolean'),
+    'motion 附带同 model+exp 真实台词范例（few-shot，含是否配到推荐动作的标志）');
+
+  const moBase = await tools.motion.run({ model: 'tomori', exp_base: 'sad' });
+  ok(moBase.exp && moBase.exp.startsWith('exp_sad') && !!moBase.note, `motion 的 exp_base「sad」落到具体编号变体 ${moBase.exp}`);
+
+  const moName = await tools.motion.run({ name: '初华', exp_base: 'shy' });
+  ok(moName.model === 'uika', 'motion 支持用角色名反查 model');
+
+  const moBad = await tools.motion.run({ model: 'no_such_model' });
+  ok(!!moBad.error && Array.isArray(moBad.核心model) && moBad.核心model.length > 0, 'motion 对未知 model 如实报错并列出核心 model（负向）');
+
+  const moSmall = await tools.motion.run({ model: 'timoris' });
+  ok(!moSmall.error, 'motion 对薄样本里人格 timoris 不崩溃（小样本走告警而非报错）');
+
+  /* 工具数：v1.5 加 action（当时漏更测试与 README → 计数断言红过一次）、v1.6 加 motion → 19。
+   * 断言写成"清单与实现一致"而非死数字，免得每次加工具都要回来改测试（旧断言死在 15 上，见 git 30815ed）。 */
+  const TOOL_NAMES = ['list', 'char', 'rel', 'event', 'quote', 'search', 'who', 'speech', 'state', 'stats', 'world', 'sample', 'card', 'worldbook', 'doc', 'skill', 'skills', 'action', 'motion'];
   ok(Object.keys(tools).length === TOOL_NAMES.length && TOOL_NAMES.every(n => typeof tools[n]?.run === 'function'),
     `工具总数 ${Object.keys(tools).length}（每个都有 run：${Object.keys(tools).join(',')}）`);
   ok(!Object.keys(tools).some(k => k.startsWith('kb_')), '工具名已去掉 kb_ 前缀（品牌由 mcp__canon__ 命名空间承担）');

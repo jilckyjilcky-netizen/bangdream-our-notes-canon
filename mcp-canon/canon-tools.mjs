@@ -313,7 +313,7 @@ export function fingerprintOf(lines) {
  * 为什么不再从 quote_bank 派生（v1.1 的做法）：
  *   quote_bank 是人工挑的 ~30 条"有戏"句子，**挑中 1 条带「～」就判该角色用波浪号**。
  *   祥子就是这样被误判的——她 quote_bank 30 条里仅 1 条带「～」（还是别人的台词
- *   「〔原文略〕！ 加油哦～！」），而她全量语料 1314 条里波浪号 **0 次**。
+ *   「〔原文略〕」），而她全量语料 1314 条里波浪号 **0 次**。
  *   后果很硬：她不拖音 ⇒ 波浪号维恒定吃 +1 偏差 ⇒ 同一段台词从第 5 名掉到第 16 名
  *   （复现：`归档/_临时诊断/闸门对照_祥子.mjs`；全库清点：`波浪号真相.mjs`；
  *   体检报告：`归档/_临时诊断/祥子_口径体检报告.md` §四）。
@@ -523,6 +523,156 @@ export function sampleBias() {
     }).filter(Boolean);
     return { name: c.name_short, 台词库句数: sents.length, 偏差: rows, 最大偏差: rows.filter(r => r.明显).sort((a, b) => Math.abs(b.差) - Math.abs(a.差)).slice(0, 2) };
   });
+}
+
+/* ================= Live2D 演出编排（motion 工具，v1.6） =================
+ * 把「设计对话场景 → 选动作 + 台词范例」接成一步到位的检索：
+ *   动作     = 从 _演出动作谱.json 的 expMotion[model][exp] 检索（canon 证据，非生成）
+ *   台词范例 = 从 _emotion_lines.jsonl 取同 model+exp 的真实台词（few-shot 约束 LLM，非生成）
+ *   效价     = 从 emotion_polarity.json 取该 exp 的 valence/arousal（供定调校验）
+ * 纪律（与 角色模型/设计思路 同一套）：
+ *   · 按上游 model 名寻址，多形态分列（mortis/doloris/timoris/amoris/oblivionis 独立动作池）
+ *   · mtn_ 尾缀 _L/_C/_R 是角色面向镜头的【朝向】，不是情绪
+ *   · 小样本（该 model 此 exp 下 <3 条）标「证据不足」，勿当定式
+ *   · 证据非判断：本工具只给 canon 做过什么，为什么这么配须人工写
+ */
+const MOTION_SCRIPT = resolve(WS, '角色模型', '设计思路', '_演出动作谱.json');
+const EMOTION_LINES = resolve(WS, '资料库', '_emotion_lines.jsonl');
+const EMOTION_POLARITY = resolve(WS, '剧情分析', '_data', 'emotion_polarity.json');
+
+let _motionScript = null;
+function loadMotionScript() {
+  if (_motionScript) return _motionScript;
+  if (!existsSync(MOTION_SCRIPT)) { _motionScript = { byModel: {}, _missing: true }; return _motionScript; }
+  try { _motionScript = JSON.parse(readFileSync(MOTION_SCRIPT, 'utf8')); }
+  catch { _motionScript = { byModel: {}, _missing: true }; }
+  return _motionScript;
+}
+let _polarity = null;
+function loadPolarity() {
+  if (_polarity) return _polarity;
+  _polarity = {};
+  if (existsSync(EMOTION_POLARITY)) { try { _polarity = JSON.parse(readFileSync(EMOTION_POLARITY, 'utf8')).polarity || {}; } catch {} }
+  return _polarity;
+}
+/** 懒加载 _emotion_lines.jsonl → Map<model, 行[]>，只建一次（25,105 行 / 3.9MB）。 */
+let _linesIdx = null;
+function loadLinesIndex() {
+  if (_linesIdx) return _linesIdx;
+  _linesIdx = new Map();
+  if (!existsSync(EMOTION_LINES)) return _linesIdx;
+  try {
+    for (const raw of readFileSync(EMOTION_LINES, 'utf8').split('\n')) {
+      const t = raw.trim();
+      if (!t) continue;
+      let o; try { o = JSON.parse(t); } catch { continue; }
+      if (!o || !o.model) continue;
+      let arr = _linesIdx.get(o.model);
+      if (!arr) { arr = []; _linesIdx.set(o.model, arr); }
+      arr.push({ exp: o.exp || '', mot: o.mot || '', text: o.text || '', advId: o.advId });
+    }
+  } catch {}
+  return _linesIdx;
+}
+const expBaseOf = (e) => String(e || '').replace(/^exp_/, '').replace(/[0-9]+$/, '').toLowerCase();
+const motDirOf = (m) => { const d = String(m || '').match(/_(L|C|R)$/i); return d ? d[1].toUpperCase() : 'C'; };
+/** name/别名 → 上游 model（权威键是 model 名；这里只做核心阵容便捷反查）。 */
+const MOTION_MODEL_ALIAS = {
+  tomori: 'tomori', anon: 'anon', rana: 'rana', soyo: 'soyo', taki: 'taki', uika: 'uika',
+  mutsumi: 'mutsumi', sakiko: 'sakiko', umiri: 'umiri', nyamu: 'nyamu', hatsune: 'hatsune',
+  mortis: 'mortis', doloris: 'doloris', timoris: 'timoris', amoris: 'amoris', oblivionis: 'oblivionis',
+  灯: 'tomori', 高松灯: 'tomori', 爱音: 'anon', 千早爱音: 'anon', 乐奈: 'rana', 要乐奈: 'rana',
+  爽世: 'soyo', 长崎爽世: 'soyo', 立希: 'taki', 椎名立希: 'taki', 初华: 'uika', 三角初华: 'uika',
+  睦: 'mutsumi', 若叶睦: 'mutsumi', 祥子: 'sakiko', 丰川祥子: 'sakiko', 海铃: 'umiri', 八幡海铃: 'umiri',
+  若麦: 'nyamu', 祐天寺若麦: 'nyamu', 初音: 'hatsune', 三角初音: 'hatsune',
+};
+const MOTION_CN = {
+  tomori: '高松灯', anon: '千早爱音', rana: '要乐奈', soyo: '长崎爽世', taki: '椎名立希', uika: '三角初华',
+  mutsumi: '若叶睦', sakiko: '丰川祥子', umiri: '八幡海铃', nyamu: '祐天寺若麦', hatsune: '三角初音',
+  mortis: '若叶睦·Mortis', doloris: '三角初华·Doloris', timoris: '八幡海铃·Timoris', amoris: '祐天寺若麦·Amoris', oblivionis: '丰川祥子·Oblivionis',
+};
+
+/**
+ * pickMotion —— 场景化「选动作 + 台词范例」。纯函数，可单测。
+ * 参数：model（或 name）/ exp（如 exp_sad01）/ exp_base（如 sad，自动落到该 model 最高频编号变体）
+ *       / top（每 exp 保留动作条数，默认 5）/ lines（台词范例条数，默认 3，0 不要）
+ */
+export function pickMotion(a = {}) {
+  const script = loadMotionScript();
+  if (script._missing) return { error: '未找到 _演出动作谱.json（请先跑 工具/抽取_演出动作谱.py）' };
+  const byModel = script.byModel || {};
+  let model = String(a?.model || '').trim().toLowerCase();
+  if (!model && a?.name) {
+    const raw = String(a.name).trim();
+    model = MOTION_MODEL_ALIAS[raw] || MOTION_MODEL_ALIAS[raw.toLowerCase()] || '';
+  }
+  if (!model || !byModel[model]) {
+    return {
+      error: `未找到 Live2D model「${a?.model || a?.name || '(空)'}」`,
+      用法: '传 model（tomori/mutsumi/mortis…）或核心角色名；里人格请直接传 model 名',
+      可用model数: Object.keys(byModel).length,
+      核心model: Object.keys(MOTION_CN).filter(m => byModel[m]),
+    };
+  }
+  const rec = byModel[model];
+  const expMotion = rec.expMotion || {};
+  const top = clamp(a?.top ?? 5, 1, 20);
+  const nLines = clamp(a?.lines ?? 3, 0, 10);
+  const expCount = (e) => Object.values(expMotion[e] || {}).reduce((s, v) => s + v, 0);
+
+  // 选定一个具体 exp
+  let exp, note;
+  if (a?.exp) {
+    exp = String(a.exp).trim();
+    if (!expMotion[exp]) return { error: `model ${model} 无 exp「${exp}」的演出记录`, 该model可用exp: Object.keys(expMotion) };
+  } else if (a?.exp_base) {
+    const base = expBaseOf(a.exp_base);
+    const cands = Object.keys(expMotion).filter(e => expBaseOf(e) === base).sort((x, y) => expCount(y) - expCount(x));
+    if (!cands.length) return { error: `model ${model} 无「${base}」系演出记录`, 该model可用exp: Object.keys(expMotion) };
+    exp = cands[0];
+    note = `exp_base「${base}」→ 该 model 最高频的编号变体 ${exp}`;
+  } else {
+    const ranked = Object.keys(expMotion).sort((x, y) => expCount(y) - expCount(x));
+    if (!ranked.length) return { error: `model ${model} 无 expMotion 记录`, 总表演行: rec.total ?? 0 };
+    exp = ranked[0];
+    note = `未指定 exp：取该 model 最高频表情 ${exp}（可用 exp / exp_base 指定）`;
+  }
+
+  const mm = expMotion[exp] || {};
+  const total = Object.values(mm).reduce((s, v) => s + v, 0);
+  const motions = Object.entries(mm).sort((x, y) => y[1] - x[1]).slice(0, top)
+    .map(([mtn, count]) => ({ mtn, count, dir: motDirOf(mtn), share: total ? +(count / total).toFixed(3) : 0 }));
+  const topMot = new Set(motions.map(m => m.mtn));
+
+  // few-shot：同 model+exp 的真实台词，优先配到推荐动作的
+  let example_lines = [];
+  if (nLines > 0) {
+    const all = (loadLinesIndex().get(model) || []).filter(l => l.exp === exp);
+    const withMot = all.filter(l => topMot.has(l.mot));
+    const seen = new Set();
+    for (const l of (withMot.length ? withMot : all)) {
+      if (seen.has(l.text)) continue;
+      seen.add(l.text);
+      example_lines.push({ text: l.text, mot: l.mot, advId: l.advId, 配推荐动作: topMot.has(l.mot) });
+      if (example_lines.length >= nLines) break;
+    }
+  }
+
+  const base = expBaseOf(exp);
+  const pol = loadPolarity()[base];
+  const out = {
+    model, 角色: MOTION_CN[model] || rec.cn || model,
+    exp, exp_base: base,
+    ...(pol ? { valence: pol.valence, arousal: pol.arousal, conf: pol.conf } : {}),
+    canon_演出条数: total,
+    motions,
+    example_lines,
+    ...(note ? { note } : {}),
+    ...(total < 3 ? { 警告: `证据不足：该 model 在此 exp 下仅 ${total} 条演出，勿当定式，建议回退到本体 model` } : {}),
+    口径: '动作=从 _演出动作谱.json expMotion 检索的 canon 证据（非生成）；_L/_C/_R 是朝向不是情绪；台词范例取自 _emotion_lines.jsonl 同 model+exp 真实台词（few-shot 约束 LLM，非生成）；证据非判断，因果链须人工写',
+    source: '_演出动作谱.json + _emotion_lines.jsonl + emotion_polarity.json',
+  };
+  return out;
 }
 
 /* ================= 工具 ================= */
@@ -805,4 +955,64 @@ export const tools = {
     if (!r) return { error: `文件不存在：人设skill/${id}/${rel}` };
     return { id, 角色: p.char?.name_short || id, part, ...r };
   }},
+  /** 对话模式×动作 合并分析（§2 说法层真源证据）：台词概率学 + live2d 动作(情绪标签) 的交叉表。
+   *  主源：角色模型/设计思路/_对话模式动作谱.json（由 工具/抽取_对话模式动作谱.py 从 MasterTalk 抽取，每行自带 台词+动作+情绪）。
+   *  X 轴=对话模式(句式，原型启发式)，Y 轴=动作，动作挂情绪标签。无 MasterTalk 台词的 Live2D 角色回退到 _演出动作谱.json(emotion×action)。
+   *  语义因果链须人工写，本工具只给证据。 */
+  action: { run: async (a) => {
+    const MERGED = resolve(WS, '角色模型', '设计思路', '_对话模式动作谱.json');
+    const SCRIPT = resolve(WS, '角色模型', '设计思路', '_演出动作谱.json');
+    if (!existsSync(MERGED)) return { error: '未找到 _对话模式动作谱.json（请先跑 工具/抽取_对话模式动作谱.py）' };
+    const merged = JSON.parse(readFileSync(MERGED, 'utf8'));
+    const byModel = merged.byModel || {};
+    // model 别名 → model（cn / 短名 / 部分名）
+    const alias = {};
+    const SHORT = { tomori:'灯', anon:'爱音', rana:'乐奈', soyo:'爽世', taki:'立希', uika:'初华', mutsumi:'睦', umiri:'海铃', nyamu:'若麦', sakiko:'祥子', mortis:'Mortis', doloris:'Doloris', timoris:'Timoris', amoris:'Amoris', oblivionis:'Oblivionis' };
+    for (const [m, rec] of Object.entries(byModel)) {
+      const cn = rec.cn || '';
+      alias[m.toLowerCase()] = m;
+      alias[cn.toLowerCase()] = m;
+      for (const part of cn.split('/')) { const p = part.trim().toLowerCase(); if (p) alias[p] = m; }
+      if (SHORT[m]) alias[SHORT[m].toLowerCase()] = m;
+    }
+    const CID2MODEL = { 1:'tomori', 2:'anon', 3:'rana', 4:'soyo', 5:'taki', 6:'uika', 7:'mutsumi', 8:'umiri', 9:'nyamu', 10:'sakiko' };
+    const top = clamp(a?.top || 6, 1, 20);
+    const slice = (obj) => Object.fromEntries(Object.entries(obj || {}).sort((x, y) => y[1] - x[1]).slice(0, top));
+    let model = null;
+    if (a?.model) model = String(a.model).toLowerCase();
+    else if (a?.id != null) model = CID2MODEL[String(a.id)];
+    else if (a?.name) model = alias[String(a.name).toLowerCase()];
+    if (model && byModel[model]) {
+      const r = byModel[model];
+      return {
+        model, 角色: r.cn, 样本: r['样本'],
+        对话模式分布: r['对话模式分布'],
+        对话模式x动作: Object.fromEntries(Object.entries(r['对话模式x动作'] || {}).map(([m, o]) => [m, slice(o)])),
+        情绪到动作_厚: Object.fromEntries(Object.entries(r['情绪到动作_厚'] || {}).map(([e, o]) => [e, slice(o)])),
+        动作到情绪_厚: Object.fromEntries(Object.entries(r['动作到情绪_厚'] || {}).map(([mo, o]) => [mo, slice(o)])),
+        note: '对话模式×动作 合并分析：X轴=对话模式(MasterTalk,薄)；Y轴=情绪→动作(ADV主线,厚)。X轴为原型启发式分类，非canon标注；因果链须人工写。',
+        source: merged._meta?.source,
+      };
+    }
+    // 回退：合并表里没有的 model（NPC/其他乐队），退回纯演出动作谱(emotion×action)
+    if (existsSync(SCRIPT)) {
+      const sd = JSON.parse(readFileSync(SCRIPT, 'utf8'));
+      const sm = sd.byModel || {};
+      let fm = model;
+      if (!fm && a?.name) { const p = pickChar(a.name); if (p?.char) fm = String(p.char.en || '').toLowerCase(); }
+      if (fm && sm[fm]) {
+        const rec = sm[fm];
+        const expMotion = {};
+        for (const [exp, ms] of Object.entries(rec.expMotion || {})) expMotion[exp] = slice(ms);
+        return { model: fm, 角色: rec.cn || '(待核对)', 总表演行: rec.total, 表情分布: rec.expressions, 动作分布: rec.motions, 情绪到动作矩阵: expMotion,
+          note: '该 model 不在合并分析表内，退回纯演出动作谱(emotion×action)。', source: sd._meta?.source };
+      }
+    }
+    const avail = Object.entries(byModel).map(([m, r]) => `${r.cn}(${m})`).sort();
+    return { error: `未找到「${a?.name || a?.model || a?.id}」的合并分析`, 可用角色数: avail.length, 可用角色: avail };
+  }},
+  /** v1.6 演出编排：场景化「选动作 + 台词范例」。model+exp → 该角色此表情下的 top mtn（含朝向/canon 次数）
+   *  + 同 model+exp 真实台词范例（few-shot）。与 action 分工：action 给某角色全量情绪→动作谱（报告向），
+   *  motion 给某一拍的具体选配（场景创作向，闭合「动作+台词」最后一公里）。 */
+  motion: { run: async (a) => pickMotion(a) },
 };

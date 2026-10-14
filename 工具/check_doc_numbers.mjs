@@ -92,11 +92,35 @@ function 旁证(t, e, cands, cellRaw) {
 }
 
 
-const dump = (口径) => JSON.parse(execFileSync(
-  process.execPath,
-  [join(WS, '工具', 'fingerprint_full.mjs'), '--dump', `--口径=${口径}`],
-  { encoding: 'utf8', maxBuffer: 1 << 28 },
-));
+/**
+ * 取真值。默认直接调 `fingerprint_full.mjs --dump`，但**那会 spawn 子进程**。
+ *
+ * ⚠️ 本沙箱里 spawnSync/execFileSync 一律撞 `EBUSY`（实测 errno -4082，
+ * `status=null`、**不抛错也不产出**，静默得比报错更坏）。所以留一个旁路：
+ * `--truth-cache <dir>` 让调用方把两套dump 预先落到文件里，本脚本只读不 spawn。
+ *
+ * 用法（沙箱内）：
+ *   node 工具/fingerprint_full.mjs --dump --口径=行   > /tmp/truth_row.json
+ *   node 工具/fingerprint_full.mjs --dump --口径=条目 > /tmp/truth_entry.json
+ *   node 工具/check_doc_numbers.mjs --truth-cache /tmp --report --write
+ *
+ * 没有这个旁路时，本脚本在受限沙箱里**必然失败**，自检里挂 info 类就是这个原因。
+ */
+const cacheDir = (() => {
+  const i = args.indexOf('--truth-cache');
+  return i >= 0 ? args[i + 1] : null;
+})();
+
+const dump = (口径) => {
+  if (cacheDir) {
+    return JSON.parse(readFileSync(join(cacheDir, `truth_${口径}.json`), 'utf8'));
+  }
+  return JSON.parse(execFileSync(
+    process.execPath,
+    [join(WS, '工具', 'fingerprint_full.mjs'), '--dump', `--口径=${口径}`],
+    { encoding: 'utf8', maxBuffer: 1 << 28 },
+  ));
+};
 const TRUTH = { 行: {}, 条目: {} };
 for (const 口径 of ['行', '条目']) {
   for (const r of dump(口径).rows) TRUTH[口径][r.short] = r;
@@ -325,10 +349,30 @@ function renderReport() {
   const L = [];
   const P = (s = '') => L.push(s);
 
+  // ⚠️ **不带 --skill 写报告 = 静默产出一份全 0 的坏报告**（实测踩过，2026-10-05）。
+  // 根因：`S`（skill 侧）为空 → 所有 `sEntry` / skill 计数恒为 0，而报告里
+  // 那些句子**语法完全正常**，读起来像「skill 侧一条问题都没有」——
+  // 实际是 145 项。那份坏报告一度让第十节的回写步数写着「0 项」。
+  // 与 MEMORY 里「数字对但对象错」同源：**工具照常输出，错误藏在语义里。**
+  // 所以这里**直接拒绝写**，而不是写完再提醒。
+  if (!S.length) {
+    console.error('拒绝写报告：skill侧扫描结果为空。');
+    console.error('  写报告必须带 --skill，否则人设skill 的145 项会被当成0 项写进文件。');
+    console.error('  正确命令：node 工具/check_doc_numbers.mjs --skill --report --write');
+    process.exit(2);
+  }
+
   P('# 数字口径审计（角色模型 + 人设 skill）');
   P();
   P('生成本文件的命令：`node 工具/check_doc_numbers.mjs --skill --report --write`');
+  P('⚠️ **漏掉 `--skill` 会被拒绝写盘** —— 否则 skill 侧计数恒为 0，且报告语句读起来完全正常（实测踩过）。');
   P('真值不落盘缓存，每次现算：`node 工具/fingerprint_full.mjs --dump --口径=行` 与 `--口径=条目`。');
+  P('受限沙箱内改用真值缓存（绕开 spawn EBUSY）：');
+  P('```bash');
+  P('node 工具/fingerprint_full.mjs --dump --口径=行   > 归档/_缓存/truth_行.json');
+  P('node 工具/fingerprint_full.mjs --dump --口径=条目 > 归档/_缓存/truth_条目.json');
+  P('node 工具/check_doc_numbers.mjs --truth-cache 归档/_缓存 --skill --report --write');
+  P('```');
   P('');
   P('## 一、为什么要做这份审计');
   P();
@@ -494,7 +538,57 @@ function renderReport() {
   P('| 6 | 顺带修正文内引用：如乐奈 ≤6字「80.3%」被灯的文档当横比基准引用，两处必须同时改 | 见第六节 | 中：漏改会造出新矛盾 |');
   P();
   P('第 3 步之前不建议动第 1、2 步以外的文件：先把「两边都对不上」的成因问清楚，否则改完仍是错数。');
-  P('');
+  P();
+
+  // ── 10.1 波浪号族：三列都成立，脚本刻意不判 ──
+  //
+  // ⚠️ **这一节是手写的判断，必须住在生成器里**：本文件是 `--report --write` 全量重写的，
+  //  直接往 md 里手写段，下次重生成就没了（2026-10-05 实测踩过）。
+  //
+  // 为什么脚本不判：`工具/_一次性/_回写_条目口径改行级.mjs` 跳过全部波浪号项，
+  // 因为这一族有**三个都成立的口径**，换一个描述就自相矛盾。
+  const waveRows = results.flatMap((r) => r.项
+    .filter((x) => x.归档 === 'c_孤儿_条目值无标注' && /波浪号|～/.test(x.指标))
+    .map((x) => ({
+      角色: r.角色,
+      文件: String(r.文件 || '').split(/[\\/]/).pop(),
+      项: x,
+      // 三列真值现算，不手抄 —— `含～` / `以～结尾` / `独立条目`
+      含: TRUTH.行[r.角色]?.['全语料含波浪号句数'] ?? '—',
+      结尾: TRUTH.行[r.角色]?.['波浪号结尾句数'] ?? '—',
+      条目: TRUTH.行[r.角色]?.['波浪号句数'] ?? '—',
+    })));
+  if (waveRows.length) {
+    P(`### 10.1 波浪号族剩 ${waveRows.length} 处待人工定口径（脚本刻意不判）`);
+    P();
+    P('`工具/_一次性/_回写_条目口径改行级.mjs` **跳过全部波浪号项**，因为这一族有');
+    P('**三个都成立的口径**，换一个描述就自相矛盾：');
+    P();
+    P('| 列 | 含义 | 适合什么样的描述 |');
+    P('|---|---|---|');
+    P('| `全语料含波浪号句数` | 行内**含**～的句数 | 「她爱用～」这种总量说法 |');
+    P('| `波浪号结尾句数` | **以～结尾**的句数 | 「**句尾**拖音」「只做收尾拖音」 |');
+    P('| `波浪号句数` | 独立波浪号条目数 | 语料以～单独成行时 |');
+    P();
+    P('回写一律应用 **`波浪号结尾句数`**，但**前提是文档描述谈的是「句尾拖音」**。');
+    P('描述只说「爽朗层」「低」「极低」这类**层级**的，套结尾列就错了 —— 得先问作者本意。');
+    P();
+    P('| 角色 | 文件 | 行 | 现文档值 | 含～ | 以～结尾 | 独立条目 | 现值等于哪列 |');
+    P('|---|---|---|---|---|---|---|---|');
+    for (const w of waveRows) {
+      const v = Number(w.项.文档值);
+      const hit = [v === w.含 ? '含～' : null, v === w.结尾 ? '以～结尾' : null, v === w.条目 ? '独立条目' : null]
+        .filter(Boolean).join(' / ') || '**都不等**';
+      P(`| ${w.角色} | ${w.文件} | L${w.项.行号} | ${w.项.文档值} | ${w.含} | ${w.结尾} | ${w.条目} | ${hit} |`);
+    }
+    P();
+    P('⚠️ 现值**与三列都对不上**的，说明当初取的是**第四套定义**，不是行级三列里的任何一列。');
+    P();
+    P('**所以问题不是「换成哪个数」，是「当初那个数是什么口径」** —— 那要问写这些文档的人，');
+    P('或者回头查当时的语料快照。这一条与步 3 的「清告 n=16 旧语料」是同类问题：');
+    P('**语料版本差异被写成了口径差异。**');
+    P();
+  }
 
   P('## 十一、复现');
   P();

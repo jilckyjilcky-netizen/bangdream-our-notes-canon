@@ -6,7 +6,7 @@
 - **语义检索**：**推荐用本地 Ollama** 做向量检索（数据不出本机、零 API 费用）；不装也能用，自动降级为纯词汇检索并在结果里说明
 - **两条传输**：**stdio**（DSH 默认注册的方式）与 **streamable-http**（`http://127.0.0.1:8787/mcp`，与 `MYGO_MCP` 同形态）
   —— 同一份协议层 + 同一份工具实现，见「## 两条传输：stdio 与 HTTP」
-- **当前版本 v1.5.0**：协议层抽到 `canon-mcp-core.mjs` + 协议版本按客户端协商 + 新增 streamable-http 传输；v1.5 起接管人设 skill（新增 `skill` / `skills`），**17 个工具**
+- **当前版本 v1.6.0**：协议层抽到 `canon-mcp-core.mjs` + 协议版本按客户端协商 + 新增 streamable-http 传输；v1.5 起接管人设 skill（新增 `skill` / `skills`）与 Live2D 演出层 `action`，v1.6 新增场景化演出编排 `motion`，**19 个工具**
 - **v1.3 名字索引**：所有收 `name` 的工具现在都认**中日全名 / 只写姓 / 只写名 / 舞台名 / 罗马音 / 简繁与和制汉字**（`三角初华`、`三角`、`三角 初華`、`Doloris`、`ドロリス`、`Uika Misumi`、`Misumi Uika`）。详见「## v1.3 更新了什么」
 
 ## 已注册
@@ -14,8 +14,8 @@
 | 项 | 值 |
 |---|---|
 | 服务端名 | `canon`（DSH project 级，stdio）—— 工具全名形如 `mcp__canon__char` |
-| 协议身份 | `canon` v1.5.0（`initialize` 实跑返回，含 title《BanG Dream! Our Notes 资料库》） |
-| 加载状态 | `loader on:active，17 个工具`（`mcp_manager_list` 可查） |
+| 协议身份 | `canon` v1.6.0（`initialize` 实跑返回，含 title《BanG Dream! Our Notes 资料库》） |
+| 加载状态 | `loader on:active，19 个工具`（`mcp_manager_list` 可查） |
 | 改代码后 | 必须 **重启加载器**（`mcp_manager_restart`）才生效；工具清单会热更新到当前会话 |
 
 > **从 v1.1 迁移**：旧的 `kb_*` 调用名仍可用（服务端保留 `kb_char → char` 的兼容映射），
@@ -69,7 +69,7 @@ node mcp-canon/canon-mcp-http.mjs      # 前台，Ctrl+C 停止
 
 ### 注册进 DSH
 
-stdio（现状，二选一，别同时开两份 17 工具）：
+stdio（现状，二选一，别同时开两份 19 工具）：
 
 ```
 mcp_manager_add(serverName=canon, transport=stdio, command=node, args=<...>\mcp-canon\canon-mcp-server.mjs)
@@ -81,7 +81,7 @@ HTTP（与 `MYGO_MCP` 同形态；**要先起服务**，否则该条目连不上
 mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.1:8787/mcp, level=project)
 ```
 
-> 两个都注册会让同名 17 个工具出现两遍（`mcp__canon__*`），日常只留一个。
+> 两个都注册会让同名 19 个工具出现两遍（`mcp__canon__*`），日常只留一个。
 
 ### 传输层实现要点
 
@@ -106,6 +106,7 @@ mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.
 | **完整《角色扮演模型》长文** | 47 份 | **`doc`** |
 | **可直接粘贴的系统提示词** | 43 份 | **`doc`（kind=prompt）** |
 | **聊天用人设 skill**（SKILL.md / lines / lore / yaml） | 32 套 | **`skill` `skills`** |
+| **Live2D 演出层**（情绪→动作谱 / 逐句带演出标签的台词） | 31,505 条 / 62 model | **`action` `motion`** |
 
 > **为什么 47 人只有 36 张卡 / 32 套 skill**：后入册的 16 名 NPC 里，只有语料 ≥75 句的 **5 名主角级**
 > （奏多 / 初音 / 铃木 / 蕾叶的祖母 / 小春）出角色卡与人设 skill；其余 **11 名薄样本**（南、波波、蓓儿、Raki、
@@ -116,7 +117,7 @@ mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.
 `.cache/script` 抓取缓存、`角色模型/提取`（签名时刻）与 `主线`、订单队列产出、任何图片/音频素材。
 需要这些就得按路径直接读文件——**MCP 只覆盖"结构化 + 可直接投喂 LLM 的文本"**。
 
-## 工具一览（17）
+## 工具一览（19）
 
 | 工具 | 参数 | 说明 |
 |---|---|---|
@@ -137,6 +138,8 @@ mcp_manager_add(serverName=canon, transport=streamable-http, url=http://127.0.0.
 | `list` | type? | 清单（角色/事件/场所/物件） |
 | `skill` | name, part?（skill\|lines\|lore\|yaml\|all）, max_chars? | **聊天用人设 skill 全文**：从 `人设skill/` 取 SKILL.md / 台词语料库 / 背景考据 / UI 元数据 |
 | `skills` | band? | **人设 skill 清单**：32 套 skill 的 id/角色/乐队/招牌机制，`band` 可按乐队过滤 |
+| `action` | model? / name? / top? | **Live2D 演出动作谱**（§2 说法层真源证据，报告向）：某角色**全量**「情绪→动作」映射。`model` 传 Live2D model 名（tomori/mutsumi/mortis…），或 `name` 传角色名（核心 16 自动反查，里人格请直接传 model） |
+| `motion` | model/name, exp? / exp_base?, top?, lines? | **演出编排**（场景创作向）：`model`+`exp`（或 `exp_base` 如 sad）→ 该角色此表情下 top 动作（含 `_L/_C/_R` 朝向与 canon 次数）+ 同 model+exp 真实台词范例（few-shot）+ valence/arousal。与 `action` 互补：`action` 给全量谱，`motion` 给某一拍的具体选配 |
 
 ## 推荐：用本地 Ollama 做向量检索
 
@@ -165,6 +168,13 @@ ollama pull qwen3-embedding:0.6b
 所以 Ollama 是**推荐项而非硬依赖**：先能用，再谈更好。
 
 **缓存**：`资料库/.kb-embeddings.json` 带语料哈希 + 模型名；数据或模型一变就自动重建，不用手动清。
+
+## v1.6 更新了什么（Live2D 演出编排 motion）
+
+1. **新增 `motion`**：场景化「选动作 + 台词范例」。传 `model` + `exp`（或 `exp_base`）→ 返回该角色此表情下最常做的 top 动作（含 `_L/_C/_R` 朝向与 canon 次数，来自 `_演出动作谱.json` 的 `expMotion`）+ 同 model+exp 的真实台词范例（few-shot，来自 `_emotion_lines.jsonl`）+ 该表情的 valence/arousal（`emotion_polarity.json`）。闭合「设计对话场景 → 动作+台词」的最后一公里。
+2. **补登 `action`**：v1.5 已把 Live2D 演出动作谱接进 MCP（`action`），但当时漏更新 README 工具表与 `_test-tools.mjs` 的计数清单——`tools/list` 实为 18 而文档/测试写 17，计数断言一度报红。本版一并校正。
+3. **分工**：`action` 给某角色**全量**情绪→动作谱（表演风格评估，报告向）；`motion` 给**某一拍**的具体选配（场景创作向）。
+4. **纪律同 `角色模型/设计思路`**：按上游 model 名寻址（里人格独立动作池）、`_L/_C/_R` 是朝向非情绪、小样本标「证据不足」、**证据非判断**（脚本只给 canon 做过什么，为什么这么配须人工写）。
 
 ## v1.4 更新了什么（HTTP 传输 + 协议层抽取）
 
@@ -275,7 +285,7 @@ v1.0 遇到多句会崩（把整段汉字数当"句长均值"），回测 top1 �
 ## 手动启动 / 测试
 
 ```bash
-# 工具层冒烟：17 个工具 + 断言全跑（不需要 spawn）
+# 工具层冒烟：19 个工具 + 断言全跑（不需要 spawn）
 node mcp-canon/_test-tools.mjs
 
 # 中日姓名索引回归（91 条名字形态 + 25 人全量，纯离线）
@@ -292,7 +302,7 @@ node mcp-canon/_test-http.mjs
 
 # 起 HTTP 服务后可直接 curl / PowerShell 打（都不是 MCP 协议的一部分，只是顺手）
 #   GET  /health                          → {ok,server,tools,...}
-#   GET  /tools                           → 17 个工具的 schema
+#   GET  /tools                           → 19 个工具的 schema
 #   POST /call  {"name":"char","arguments":{"name":"初华"}}
 node mcp-canon/canon-mcp-http.mjs
 

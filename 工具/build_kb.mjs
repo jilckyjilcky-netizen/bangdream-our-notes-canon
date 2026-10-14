@@ -198,7 +198,7 @@ for (const it of curated.items) index[it.id] = [it.name, it.kind, it.summary, (i
 const kb = {
   meta: {
     title: 'BanG Dream! Our Notes 资料库（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock）',
-    data_version: 'e36a8be5d83e',
+    data_version: '4ec8b82271e8',
     generated: new Date().toISOString(),
     toolchain: ['工具/corpus_attribute.mjs', '工具/fingerprint_full.mjs', '工具/persona_stats.mjs', '工具/persona_compare.mjs', '工具/build_kb.mjs'],
     schema: { characters: String(characters.length), events: curated.events.length, places: curated.places.length, items: curated.items.length }

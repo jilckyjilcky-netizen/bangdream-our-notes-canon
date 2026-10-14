@@ -28,10 +28,12 @@ export const TOOL_DEFS = {
   doc: { description: '取该角色的长文：kind=model 返回完整《角色扮演模型》（默认，上限 60000 字），kind=prompt 返回可直接粘贴的系统提示词（上限 20000 字）；被截断时用 max_chars 控制', schema: { type: 'object', properties: { name: { type: 'string' }, kind: { type: 'string', enum: ['model', 'prompt'] }, max_chars: { type: 'number' } }, required: ['name'] } },
   skills: { description: '聊天用人设 skill 清单：列出 人设skill/ 下全部 skill（id/角色/乐队/招牌机制）。id = canon 角色 id = 文件夹名，作 skill 工具的 name 参数。可选 band 过滤', schema: { type: 'object', properties: { band: { type: 'string', description: '按乐队过滤：MyGO!!!!!|Ave Mujica|梦限大MewType|millsage|一家Dumb Rock!|Sumimi（非乐队）' } } } },
   skill: { description: '取某角色的聊天用人设 skill 全文：name 传角色名/别名/id（如 祥子/sakiko/小祥），part 选 skill（默认，SKILL.md）|lines（台词语料库）|lore（背景考据）|yaml（UI 元数据）|all（四件全给）。人设 skill 让 CLI 用该角色腔调说话，骨架对齐 dafeiyu skill', schema: { type: 'object', properties: { name: { type: 'string' }, part: { type: 'string', enum: ['skill', 'lines', 'lore', 'yaml', 'all'] }, max_chars: { type: 'number', description: '单文件返回上限，默认 8000（all 模式每文件 8000）' } }, required: ['name'] } },
+  action: { description: 'Live2D 演出动作谱（§2 说法层真源证据）：返回某角色「情绪→演出动作」映射，可作表演风格评估报告。model 传 Live2D model 名（tomori/mutsumi/mortis…），或 name 传角色名（核心 16 自动反查；alter ego 请直接传 model）。证据非判断——因果链须人工写', schema: { type: 'object', properties: { model: { type: 'string', description: 'Live2D model 名，如 tomori / mutsumi / mortis' }, name: { type: 'string', description: '角色名/别名（核心 16 自动反查到 model）' }, top: { type: 'number', description: '每个表情下保留的动作条数，默认 6' } } } },
+  motion: { description: '演出编排（场景创作向）：设计某一拍对话时，传 model + exp（或 exp_base）→ 返回该角色此表情下最常做的 top 动作（含 _L/_C/_R 朝向与 canon 次数）+ 同 model+exp 的真实台词范例（few-shot，约束写出的台词不串味）+ 该表情的 valence/arousal。动作与台词范例都是 canon 证据（非生成），按上游 model 名寻址（里人格独立动作池）。与 action 的分工：action 给全量情绪→动作谱（报告向），motion 给某一拍的具体选配（创作向）', schema: { type: 'object', properties: { model: { type: 'string', description: 'Live2D model 名，如 tomori / uika / mortis' }, name: { type: 'string', description: '角色名/别名/简称（核心阵容自动反查到 model）' }, exp: { type: 'string', description: '具体表情，如 exp_sad01' }, exp_base: { type: 'string', description: '表情词根，如 sad/shy/angry——自动落到该 model 最高频的编号变体' }, top: { type: 'number', description: '每个表情保留的动作条数，默认 5' }, lines: { type: 'number', description: '台词范例条数，默认 3（传 0 不要）' } } } },
 };
 
 /** MCP 服务端身份（initialize 返回；两条传输一致） */
-export const SERVER_INFO = { name: 'canon', title: 'BanG Dream! Our Notes 资料库', version: '1.5.0' };
+export const SERVER_INFO = { name: 'canon', title: 'BanG Dream! Our Notes 资料库', version: '1.6.0' };
 
 /** 我们声明支持的协议版本（与官方 @modelcontextprotocol/sdk 1.30 的集合对齐） */
 export const SUPPORTED_PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07'];
