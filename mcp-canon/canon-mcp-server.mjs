@@ -2,7 +2,7 @@
 /**
  * canon-mcp-server.mjs —— 《BanG Dream! Our Notes》资料库 MCP 服务器（stdio，零依赖）
  *
- * 作品：BanG Dream! Our Notes（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock，25 人）
+ * 作品：BanG Dream! Our Notes（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock，5 支乐队 25 人；全库在册 47 人）
  * 定位：该作品的**可检索文本层**——角色档案 / 角色卡 / 关系 / 状态机 / 语言指纹 / 台词 / 事件 / 场所物件 / 世界书 / 完整模型文档。
  *
  * 工具实现见 canon-tools.mjs；协议层（工具清单 / 初始化协商 / JSON-RPC 分发）见 canon-mcp-core.mjs；

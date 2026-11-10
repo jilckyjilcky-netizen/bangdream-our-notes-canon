@@ -3,11 +3,14 @@
  * canon-tools.mjs —— 《BanG Dream! Our Notes》资料库 · MCP 工具逻辑（纯函数层，可 import 直接测试）
  * 被 canon-mcp-server.mjs 引用；也可被其他脚本 import 复用（工具/canon.mjs 就是这么用的）。
  *
- * 服务对象：BanG Dream! Our Notes（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock 共 25 人，加 sumimi 真奈与 4 名 NPC，在册 30 人）可检索文本层。
+ * 服务对象：BanG Dream! Our Notes（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock! 五团，
+ * 加 妖精花束 / Sumimi 真奈 / NPC，在册 47 人）可检索文本层。
+ *
+ * v1.7（契约自洽修复）：见文件末「v1.7」注释块；工具自述里的规模数字不再手写，改由 工具/check_doc_totals.mjs 对账。
  *
  * v1.2（2026-09-27）改名 + 接管其余文本资产：
  *   · 更名：kb_* 工具名去掉前缀（现在由 MCP 命名空间 mcp__canon__ 承担品牌）
- *   · 新增 card（SillyTavern V2 角色卡全文）、worldbook（世界书 50 词条）、doc（完整《角色扮演模型》/ 系统提示词）
+ *   · 新增 card（SillyTavern V2 角色卡全文）、worldbook（世界书 66 词条）、doc（完整《角色扮演模型》/ 系统提示词）
  *   · stats 增加「检索后端」与「文本资产」自述——Ollama 没起时当场告诉你怎么恢复
  *
  * v1.1（2026-09-27）功能更新：
@@ -31,11 +34,30 @@ export const RERANK_MODEL = process.env.RERANK_MODEL || '';
 
 export const kb = JSON.parse(readFileSync(KB_PATH, 'utf8'));
 
+/* ================= 乐队名归一（v1.7） =================
+ * 上游对同一支乐队有三种写法，kb.json 里实际并存两种：
+ *   '一家DumbRock'    —— 无空格无感叹号：4 名后入册 NPC 走 build_kb.mjs:54 那条归一
+ *   '一家Dumb Rock!'  —— canon 正式名：5 名主力/别名表/世界书用这个
+ * 这个坑已经踩过一次：build_narrative_profile.mjs:98-100 明确记着
+ *   「直接 === 会把整队静默匹配成 0」。
+ * skills(band) 原来踩的是同一个坑：band='一家DumbRock' 与 '一家Dumb Rock!' 各匹配一半。
+ * 所以在**加载层归一一次**，让所有会输出 乐队 的工具（list/speech/state/skills…）口径一致；
+ * 同时留 BAND_RAW 记录 KB 里的原始写法，供 stats 自述——**归一不等于隐藏数据问题**。
+ */
+const BAND_ALIAS = { '一家Dumb Rock': '一家Dumb Rock!', '一家DumbRock': '一家Dumb Rock!' };
+export const normBand = (b) => (b == null ? null : (BAND_ALIAS[b] || b));
+export const BAND_RAW = {};
+for (const c of kb.characters || []) {
+  if (!c.band) continue;
+  BAND_RAW[c.band] = (BAND_RAW[c.band] || 0) + 1;
+  c.band = normBand(c.band);
+}
+
 /* ================= 工作区其余"文本资产"索引（v1.2） =================
  * 这些东西以前只能按路径去翻文件，MCP 拿不到；现在都接进来了：
- *   角色卡/          30 张 SillyTavern V2 卡（chara_card_v2）
- *   世界书/          1 份世界书（50 词条）
- *   角色模型/系统提示词/  26 份可直接粘贴的 system prompt
+ *   角色卡/          36 张 SillyTavern V2 卡（chara_card_v2）
+ *   世界书/          1 份世界书（66 词条）
+ *   角色模型/系统提示词/  43 份可直接粘贴的 system prompt
  *   （《角色扮演模型》长文由 kb.json 的 doc 字段指向，见 doc 工具）
  */
 const lsDir = (rel, filter = () => true) => { try { return readdirSync(resolve(WS, rel)).filter(filter); } catch { return []; } };
@@ -111,7 +133,7 @@ export async function checkOllama() {
 export async function backendInfo() {
   const up = await checkOllama();
   return up
-    ? { 模式: '混合检索（本地语义 + 词汇）', 嵌入模型: EMBED_MODEL, 精排模型: RERANK_MODEL || null, ollama: OLLAMA, 说明: '本地 Ollama 向量检索已就绪：数据不出本机、无 API 费用；rerank=true 时走精排模型' }
+    ? { 模式: '混合检索（本地语义 + 词汇）', 嵌入模型: EMBED_MODEL, 精排模型: RERANK_MODEL || null, ollama: OLLAMA, 说明: '本地 Ollama 向量检索已就绪：数据不出本机、无 API 费用；rerank=true 时走精排模型', ...(cacheWarn ? { 缓存: cacheWarn } : {}) }
     : { 模式: '仅词汇（语义已降级）', 嵌入模型: null, ollama: OLLAMA, 说明: `Ollama 不可达，语义检索已禁用（词汇检索仍可用）。恢复：装好 ollama 后执行  ollama pull ${EMBED_MODEL}` };
 }
 
@@ -119,7 +141,7 @@ export async function backendInfo() {
 const CACHE_FILE = join(HERE, '..', '资料库', '.kb-embeddings.json');
 const hash = (s) => { let h = 5381; for (const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
 const chunksHash = hash(CHUNKS.map(c => c.type + c.id + c.text).join('\x01'));
-let vectors = null, embedErr = null;
+let vectors = null, embedErr = null, cacheWarn = null;
 
 export async function loadVectors() {
   if (vectors) return vectors;
@@ -139,8 +161,15 @@ export async function loadVectors() {
     }
     if (all.length !== CHUNKS.length) throw new Error(`嵌入数量不符 ${all.length}/${CHUNKS.length}`);
     vectors = all;
+  } catch (e) { embedErr = '嵌入失败: ' + e.message; vectors = null; return null; }
+  // 落盘只是「让下次启动省掉重算」的附加动作：写失败（只读目录 / 沙箱受限 / 磁盘满）绝不能把
+  // 本次已经算好的向量一并作废。旧写法在同一条 try 里 writeFileSync，失败即 vectors = null，
+  // 于是每次 search 都重算全部 1383 块（实测 ≈115 秒），还把真实原因伪装成「嵌入失败」。
+  try {
     writeFileSync(CACHE_FILE, JSON.stringify({ model: EMBED_MODEL, hash: chunksHash, vectors }), 'utf8');
-  } catch (e) { embedErr = '嵌入失败: ' + e.message; vectors = null; }
+  } catch (e) {
+    cacheWarn = `嵌入缓存未能写盘（${e.code || e.message}），本进程改用内存向量、不再重算；下次启动仍会重算一次`;
+  }
   return vectors;
 }
 const cos = (a, b) => { let dot = 0, na = 0, nb = 0; for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; } return dot / (Math.sqrt(na) * Math.sqrt(nb) || 1); };
@@ -165,9 +194,22 @@ function lexicalHits(q, limit = 8) {
 async function semanticHits(q, limit = 8) {
   const V = await loadVectors();
   if (!V) return { hits: [], note: embedErr };
-  const qv = await embedOne(q);
+  /* v1.8：缓存命中时 loadVectors 直接 return，根本不调 checkOllama，于是 embedOne 一句裸 fetch
+   * 就把 ECONNREFUSED 抛到工具层——「Ollama 不可达自动降级词汇检索」的承诺只在**冷启动**
+   * （无 .kb-embeddings.json）时成立，恰恰是跑过一次之后必坏。同一条 catch 也覆盖
+   * 「ollama 起着但没 pull 模型」「返回空向量」两种同类失败。 */
+  let qv;
+  try { qv = await embedOne(q); }
+  catch (e) {
+    embedErr = '查询嵌入失败，语义检索已降级（词汇检索仍可用）: ' + (e?.cause?.code || e?.message || e);
+    return { hits: [], note: embedErr };
+  }
+  if (!Array.isArray(qv) || !qv.length) {
+    embedErr = '查询嵌入返回空向量，语义检索已降级（词汇检索仍可用）';
+    return { hits: [], note: embedErr };
+  }
   const scored = CHUNKS.map((c, i) => ({ ...c, score: cos(qv, V[i]) }));
-  return { hits: scored.sort((a, b) => b.score - a.score).slice(0, limit), note: null };
+  return { hits: scored.sort((a, b) => b.score - a.score).slice(0, limit), note: cacheWarn };
 }
 export async function hybrid(q, topK = 6, useRerank = false) {
   const lex = lexicalHits(q, 8);
@@ -176,12 +218,22 @@ export async function hybrid(q, topK = 6, useRerank = false) {
   for (const h of lex) map.set(h.type + h.id + h.text, { ...h, _lex: h.score, _sem: 0 });
   for (const h of sem.hits) { const k = h.type + h.id + h.text; const cur = map.get(k); if (cur) cur._sem = h.score; else map.set(k, { ...h, _lex: 0, _sem: h.score }); }
   let list = [...map.values()].map(h => ({ ...h, score: h._lex + Math.max(0, h._sem) * 4 })).sort((a, b) => b.score - a.score);
+  if (useRerank && !RERANK_MODEL) {
+    // v1.7：旧版这里**静默跳过**——调用方传了 rerank:true，却拿到未精排的结果，且 note 里没有一个字。
+    // 现在如实回报"为什么没精排"以及怎么开启。
+    return {
+      hits: list.slice(0, topK),
+      note: [sem.note, 'rerank 未生效：未设置 RERANK_MODEL（设成本地精排模型后 rerank=true 才生效），本次返回的是未精排结果'].filter(Boolean).join('；'),
+    };
+  }
   if (useRerank && RERANK_MODEL) {
     try {
       const r = await ollama('/api/rerank', { model: RERANK_MODEL, query: q, documents: list.slice(0, 8).map(c => c.text) }, 60000);
-      const hits = (r.results || []).sort((a, b) => b.score - a.score).slice(0, 5).map(x => ({ ...list[x.index], score: x.score }));
+      // v1.7：原为写死 slice(0,5)，忽略调用方 top_k；空结果也不回退，直接返回空。
+      const hits = (r.results || []).sort((a, b) => b.score - a.score).slice(0, topK).map(x => ({ ...list[x.index], score: x.score }));
+      if (!hits.length) return { hits: list.slice(0, topK), note: [sem.note, 'rerank 返回空结果，已回退未精排顺序'].filter(Boolean).join('；') };
       return { hits, note: sem.note };
-    } catch (e) { return { hits: list.slice(0, topK), note: 'rerank 失败: ' + e.message }; }
+    } catch (e) { return { hits: list.slice(0, topK), note: [sem.note, 'rerank 失败，已回退未精排：' + e.message].filter(Boolean).join('；') }; }
   }
   return { hits: list.slice(0, topK), note: sem.note };
 }
@@ -357,7 +409,7 @@ const SCORE_DIMS = [
 ];
 const WAVE_DIM = { metric: '波浪号', est: (f) => f.波浪号率, kind: 'pct', expectOf: (name) => (WAVE_EXPECT.get(name)?.expect ? 100 : 0) };
 
-/* 每个维度在 25 人里的分布（用于 z 打分）与排序（用于 rank 打分），只算一次 */
+/* 每个维度在**全名册**（现 47 人）里的分布（用于 z 打分）与排序（用于 rank 打分），只算一次 */
 const DIM_CANON = new Map();
 function dimCanon(dim) {
   if (!DIM_CANON.has(dim.metric)) {
@@ -379,11 +431,12 @@ function rankOf(sorted, v) {
 
 /**
  * 偏差分：越低越像。返回全部角色，升序。
- * mode：三种口径在 399 句回测上**互相区分不出来**（见 _bench-who.mjs 的表），
+ * mode：三种口径在 1645 句回测上**仍未达显著区分**（见 _bench-who.mjs 的表），
  *       故取最简单的 raw 作默认，不在这份**有偏样本**上调参（那是过拟合）。
- *   'raw'（默认）——各维度绝对差（长度用相对差）直接平均。单句 11.0% / 3 句 14.0% / 5 句 15.8%
- *   'rank' ——各维度先化成"在 25 人里的位置"再比位置差。单句 10.0% / 3 句 14.9% / 5 句 14.0%
- *   'z'    ——按 25 人标准差归一化。单句 9.5% / 3 句 13.2% / 5 句 17.5%（n=57，噪声 ±5pp）
+ *   'raw'（默认）——各维度绝对差（长度用相对差）直接平均。单句 5.6% / 3 句 10.7% / 5 句 10.7%
+ *   'rank' ——各维度先化成"在全名册里的位置"再比位置差。单句 5.8% / 3 句 12.2% / 5 句 17.8%
+ *   'z'    ——按全名册标准差归一化。单句 4.3% / 3 句 11.3% / 5 句 13.3%（n=309，SE≈1.8pp）
+ * 括号外是 top1。rank 在三档都略高，但差距 1.6~1.9 个标准误，未达显著，所以默认不动。
  */
 export function scoreCharacters(fp, { includeWave = true, mode = 'raw', drop = [], topDetail = 3 } = {}) {
   const dims = (includeWave ? [...SCORE_DIMS, WAVE_DIM] : SCORE_DIMS).filter(d => !drop.includes(d.metric));
@@ -593,7 +646,30 @@ const MOTION_CN = {
 };
 
 /**
- * pickMotion —— 场景化「选动作 + 台词范例」。纯函数，可单测。
+ * model 字段解析（v1.7）：让 **model 与 name 完全等价**，且都接受中文角色名/别名。
+ * v1.6 的坑：只有 name 走别名表，model 被原样 toLowerCase() —— 于是
+ *   motion({ model: '高松灯', exp_base: 'sad' }) → 「未找到 Live2D model「高松灯」」，
+ *   而 motion({ name: '高松灯', exp_base: 'sad' }) 正常。两个字段语义相同却不等价。
+ * 现在统一走：上游 model 名（不区分大小写）→ 别名表 → 姓名索引取 canon id（= model 名）。
+ * 命中路径通过 model_解析 回显，便于调用方知道"这个名字是怎么被认出来的"。
+ */
+function resolveMotionModel(modelArg, nameArg, byModel) {
+  const tried = [];
+  for (const [label, v] of [['model', modelArg], ['name', nameArg]]) {
+    const raw = String(v ?? '').trim();
+    if (!raw || tried.includes(raw)) continue;
+    tried.push(raw);
+    const low = raw.toLowerCase();
+    if (byModel[low]) return { model: low, via: `${label} 直查` };
+    const alias = MOTION_MODEL_ALIAS[raw] || MOTION_MODEL_ALIAS[low];
+    if (alias && byModel[alias]) return { model: alias, via: `${label} 别名 ${raw}→${alias}` };
+    const c = resolveChar(raw);
+    if (c?.id && byModel[c.id]) return { model: c.id, via: `${label} 姓名索引 ${raw}→${c.id}` };
+  }
+  return { model: '', via: null };
+}
+
+/**
  * 参数：model（或 name）/ exp（如 exp_sad01）/ exp_base（如 sad，自动落到该 model 最高频编号变体）
  *       / top（每 exp 保留动作条数，默认 5）/ lines（台词范例条数，默认 3，0 不要）
  */
@@ -601,15 +677,11 @@ export function pickMotion(a = {}) {
   const script = loadMotionScript();
   if (script._missing) return { error: '未找到 _演出动作谱.json（请先跑 工具/抽取_演出动作谱.py）' };
   const byModel = script.byModel || {};
-  let model = String(a?.model || '').trim().toLowerCase();
-  if (!model && a?.name) {
-    const raw = String(a.name).trim();
-    model = MOTION_MODEL_ALIAS[raw] || MOTION_MODEL_ALIAS[raw.toLowerCase()] || '';
-  }
-  if (!model || !byModel[model]) {
+  const { model, via } = resolveMotionModel(a?.model, a?.name, byModel);
+  if (!model) {
     return {
       error: `未找到 Live2D model「${a?.model || a?.name || '(空)'}」`,
-      用法: '传 model（tomori/mutsumi/mortis…）或核心角色名；里人格请直接传 model 名',
+      用法: 'model 与 name 等价，都可传上游 model 名（tomori/mutsumi/mortis…）或角色名/别名（高松灯 / 灯 / 初华 / 若叶睦 / 祥子…）；里人格（mortis/doloris/timoris/amoris/oblivionis）请直接传 model 名',
       可用model数: Object.keys(byModel).length,
       核心model: Object.keys(MOTION_CN).filter(m => byModel[m]),
     };
@@ -660,16 +732,23 @@ export function pickMotion(a = {}) {
 
   const base = expBaseOf(exp);
   const pol = loadPolarity()[base];
+  const thin = total < 3;   // 该 model「在此 exp 下」的样本量
   const out = {
     model, 角色: MOTION_CN[model] || rec.cn || model,
     exp, exp_base: base,
-    ...(pol ? { valence: pol.valence, arousal: pol.arousal, conf: pol.conf } : {}),
+    ...(/直查$/.test(via || '') ? {} : { model_解析: via }),
+    // v1.7：valence/arousal 是**词根级人工判定**（emotion_polarity.json，与 model、与本 exp 的样本量都无关），
+    // 但 conf 说的是"这个词根的语义判定有多确定"。旧版不看样本量照样发 conf，于是
+    // 226 个 (model, exp) 组合同屏输出 conf:"high" + 警告:"证据不足" —— 自相矛盾。
+    // 现在：conf 只在样本充足（total>=3）时发；样本不足时**连 conf 一起撤掉**，并给出机器可读的 证据级别。
+    ...(pol ? { valence: pol.valence, arousal: pol.arousal, ...(thin ? {} : { conf: pol.conf }) } : {}),
+    证据级别: thin ? '不足' : '充分',
     canon_演出条数: total,
     motions,
     example_lines,
     ...(note ? { note } : {}),
-    ...(total < 3 ? { 警告: `证据不足：该 model 在此 exp 下仅 ${total} 条演出，勿当定式，建议回退到本体 model` } : {}),
-    口径: '动作=从 _演出动作谱.json expMotion 检索的 canon 证据（非生成）；_L/_C/_R 是朝向不是情绪；台词范例取自 _emotion_lines.jsonl 同 model+exp 真实台词（few-shot 约束 LLM，非生成）；证据非判断，因果链须人工写',
+    ...(thin ? { 警告: `证据不足：该 model 在此 exp 下仅 ${total} 条演出，勿当定式，建议回退到本体 model；已同步撤下 conf（词根判定置信度），避免与「证据不足」打架` } : {}),
+    口径: '动作=从 _演出动作谱.json expMotion 检索的 canon 证据（非生成）；_L/_C/_R 是朝向不是情绪；台词范例取自 _emotion_lines.jsonl 同 model+exp 真实台词（few-shot 约束 LLM，非生成）；证据非判断，因果链须人工写；conf 是词根级（而非本 exp 派生）置信度，仅在 证据级别=充分 时给出',
     source: '_演出动作谱.json + _emotion_lines.jsonl + emotion_polarity.json',
   };
   return out;
@@ -679,8 +758,15 @@ export function pickMotion(a = {}) {
 export const tools = {
   list: { run: async (a) => {
     const t = a?.type;
-    const out = { 角色: kb.characters.map(c => `${c.name_short}（${c.band} ${c.role}）`), 事件: kb.events.map(e => e.name), 场所: kb.places.map(p => p.name), 物件: kb.items.map(i => `${i.name}（${i.kind}）`) };
-    return t && out[t] ? { [t]: out[t] } : out;
+    // v1.7：改为**结构化输出**。旧版给的是「灯（MyGO!!!!! Vo.）」这种"给人看的串"，
+    // 而 char 只认 name、不认这种串——工具间无法回喂。现在每条都带 name + id，可直接当参数用。
+    const out = {
+      角色: kb.characters.map(c => ({ id: c.id, name: c.name_short, band: c.band, role: c.role })),
+      事件: kb.events.map(e => ({ id: e.id, name: e.name })),
+      场所: kb.places.map(p => ({ id: p.id, name: p.name })),
+      物件: kb.items.map(i => ({ id: i.id, name: i.name, kind: i.kind })),
+    };
+    return { ...(t && out[t] ? { [t]: out[t] } : out), 说明: '每条 name / id 都能直接回喂给 char · world · doc · worldbook · rel（2026-10-19 起结构化为可回喂字段，旧版是给人看的拼接串）' };
   }},
   char: { run: async (a) => {
     const p = pickChar(a?.name || '');
@@ -750,10 +836,10 @@ export const tools = {
       const rows = kb.characters.map(c => ({ name: c.name_short, band: c.band, value: numOf(c.speech?.[m.key]), raw: c.speech?.[m.key] }))
         .filter(r => !isNaN(r.value))
         .sort((x, y) => (order === 'asc' ? x.value - y.value : y.value - x.value));
-      return { metric: m.key, order, 有效人数: rows.length, ranking: rows.slice(0, clamp(a?.top_k || 10, 1, 25)) };
+      return { metric: m.key, order, 有效人数: rows.length, ranking: rows.slice(0, clamp(a?.top_k || 10, 1, kb.characters.length)) };
     }
     const names = toArr(a?.names ?? a?.name);
-    if (!names.length) return { error: '需要 name（角色）或 metric（指标名）', metrics: SPEECH_METRICS, 用法: 'name=爽世 看明细；metric=疑问率 看 25 人排名；names=[a,b] 并排对比' };
+    if (!names.length) return { error: '需要 name（角色）或 metric（指标名）', metrics: SPEECH_METRICS, 用法: 'name=爽世 看明细；metric=疑问率 看全名册排名；names=[a,b] 并排对比' };
     const chars = [];
     for (const n of names) { const p = pickChar(n); if (p.err) return p.err; chars.push(p.char); }
     const table = {};
@@ -883,9 +969,13 @@ export const tools = {
       内容: e.content || '', enabled: e.enabled !== false, 长度: (e.content || '').length,
     }));
     if (!q) {
+      // v1.7：旧版目录写死 slice(0, 60)，而 词条数 报的是 list.length(=66) ——
+      // 「世界书 66 条」却只列出 60 条，调用方会以为少了 6 条。现在默认全给（top_k 仍可显式收窄）。
+      const cap = clamp(a?.top_k || list.length, 1, 200);
+      const dir = list.map(({ 内容, ...rest }) => rest);
       return {
-        文件: WORLDBOOK_FILE, 词条数: list.length, 元数据: WORLDBOOK.metadata,
-        词条: list.map(({ 内容, ...rest }) => rest).slice(0, clamp(a?.top_k || 60, 1, 200)),
+        文件: WORLDBOOK_FILE, 词条数: list.length, 返回条数: Math.min(cap, dir.length), 元数据: WORLDBOOK.metadata,
+        词条: dir.slice(0, cap),
         note: '未给 q：只回目录（标题/关键词/长度）。给 q 或 uid 取正文。',
       };
     }
@@ -925,17 +1015,32 @@ export const tools = {
     let dirs;
     try { dirs = readdirSync(root).filter(f => existsSync(join(root, f, 'SKILL.md'))); }
     catch { return { error: '人设skill/ 目录不存在或不可读', 提示: '该工具读取工作区根下 人设skill/，确认已并入并提交' }; }
-    const byBand = a?.band;
+    const byBand = a?.band ? normBand(a.band) : null;
     const out = [];
+    const 名不一致 = [];
+    const charOfDir = (id) => kb.characters.find(x => x.id === id) || resolveChar(id) || null;
     for (const id of dirs.sort()) {
-      const c = kb.characters.find(x => x.id === id);
+      // 文件夹名**不保证**等于 canon id：人设skill/rikki 对应 canon id taki
+      //（"Rikki" 是爱音给立希起的外号，被有意用作 skill id）。旧版只做 x.id === id 精确匹配，
+      // 于是 rikki 匹配不到角色 → 乐队=null → 一传 band 就被静默丢弃（MyGO 只剩 4 套）。
+      // 现在先按 id 命中，命中不了再走姓名索引（别名/全名/舞台名/罗马音都认）。
+      const c = charOfDir(id);
+      if (c && c.id !== id) 名不一致.push(`${id} → ${c.id}（${c.name_short}）`);
       let mech = null;
       try { const md = readFileSync(join(root, id, 'SKILL.md'), 'utf8'); const m = md.match(/^##\s+(.+?)（招牌机制）/m); if (m) mech = m[1].trim(); } catch {}
-      const band = c?.band || null;
+      const band = normBand(c?.band) || null;
       if (byBand && band !== byBand) continue;
       out.push({ id, 角色: c?.name_short || id, 乐队: band, 招牌机制: mech, 触发: `/${id}` });
     }
-    return { 总数: out.length, skills: out, 说明: 'name 传 id 或角色名/别名给 skill 工具取正文；文件夹名 = canon 角色 id' };
+    const 乐队清单 = [...new Set(dirs.map(id => normBand(charOfDir(id)?.band)).filter(Boolean))].sort();
+    return {
+      总数: out.length,
+      ...(byBand ? { 过滤: byBand } : {}),
+      skills: out,
+      乐队清单,
+      ...(名不一致.length ? { 告警_文件夹名与canonID不一致: 名不一致 } : {}),
+      说明: 'name 传 id 或角色名/别名给 skill 工具取正文；文件夹名通常 = canon 角色 id，不一致的见「告警」；band 已做乐队名归一（一家DumbRock / 一家Dumb Rock! 视为同一队）',
+    };
   }},
   skill: { run: async (a) => {
     const name = a?.name || '';

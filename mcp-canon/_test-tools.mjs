@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * _test-tools.mjs —— 直接 import 工具层冒烟测试（不走 spawn，规避管道 EPERM）
- * v1.1：覆盖全部 12 个工具 + 关键回归断言。
+ * 覆盖全部 19 个工具 + 关键回归断言（含 v1.6.x 修掉的 6 个契约缺陷回归 + 自述数字一致性）。
  * 用法：node mcp-canon/_test-tools.mjs        （语义检索部分需要 Ollama；不可达会自动降级）
  */
 import { tools, checkOllama, WAVE_CHARS, WAVE_EXPECT, SPEECH_METRICS } from './canon-tools.mjs';
@@ -15,20 +15,48 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
 
 (async () => {
   const up = await checkOllama();
-  console.log(`✓ ollama 可达: ${up} ｜ 语义模型 qwen3-embedding:0.6b`);
+  console.log(`${up ? '✓' : '⚠'} ollama 可达: ${up} ｜ 语义模型 qwen3-embedding:0.6b ｜ 检索：${up ? '混合（语义+词汇）' : '仅词汇（语义降级）'}`);
 
   const show = (label, o) => {
     console.log(`\n━━━ ${label}（${elapsed()}）━━━`);
     console.log(JSON.stringify(o, null, 2).slice(0, 1400));
   };
 
-  /* ---------- 检索类（需要 Ollama，不可达时自动纯词汇降级） ---------- */
-  show('search: 害怕失去乐队的人', await tools.search.run({ q: '害怕失去乐队的人', top_k: 3 }));
-  show('search: 抹茶', await tools.search.run({ q: '抹茶', top_k: 3 }));
-  show('search: type=台词 · 一起前进', await tools.search.run({ q: '一起前进', top_k: 3, type: '台词' }));
-  show('quote: 想和别人一起前进', await tools.quote.run({ q: '想和别人一起前进', top_k: 3 }));
-  show('quote: by=爽世（限定说话人）', await tools.quote.run({ by: '爽世', top_k: 3 }));
-  show('event: 面具', await tools.event.run({ q: '面具', top_k: 2 }));
+  /* 检索类是最容易「漏降级」的一族：一条裸 fetch 抛错会直接把整个测试停在 TOP-LEVEL catch，
+   * 报一句 `TEST FAIL: fetch failed`，既看不出是哪个工具、也分不清「工具坏了」和「没装 ollama」。
+   * 这里把抛错记成一条具名失败，后面的断言继续跑。 */
+  const safeRun = async (tool, args) => {
+    try { return await tools[tool].run(args); }
+    catch (e) {
+      fail++;
+      console.log(`  ✗ ${tool} 在 ollama ${up ? '可达' : '不可达'}时抛错（这条路径漏了降级）: ${e.message}${e.cause?.code ? ' / ' + e.cause.code : ''}`);
+      return {};
+    }
+  };
+
+  /* ---------- 检索类（需要 Ollama，不可达时自动纯词汇降级） ----------
+   * 断言口径：「不可达」是受支持状态，要验的是**降级后仍可用**，而不是「必须连上 ollama」。
+   * v1.8 前这里只 show() 不断言，于是「向量缓存命中 + ollama 已停」抛 ECONNREFUSED 时，
+   * 测试既没测到降级、也没指出是哪个工具。 */
+  const sFear = await safeRun('search', { q: '害怕失去乐队的人', top_k: 3 });
+  show('search: 害怕失去乐队的人', sFear);
+  ok(Array.isArray(sFear.results), 'search 返回 results 数组（不抛错）');
+  if (!up) ok(typeof sFear.note === 'string' && /降级|不可达|禁用/.test(sFear.note), `ollama 不可达时 search 如实自述已降级：${sFear.note}`);
+  const sMatcha = await safeRun('search', { q: '抹茶', top_k: 3 });
+  show('search: 抹茶', sMatcha);
+  ok(sMatcha.results?.length > 0, `search 命中「抹茶」${sMatcha.results?.length ?? 0} 条（纯词法路径同样可用）`);
+  show('search: type=台词 · 一起前进', await safeRun('search', { q: '一起前进', top_k: 3, type: '台词' }));
+  const qForward = await safeRun('quote', { q: '想和别人一起前进', top_k: 3 });
+  show('quote: 想和别人一起前进', qForward);
+  ok(Array.isArray(qForward.quotes), 'quote 带 q 时返回 quotes 数组（不抛错）');
+  if (!up) ok(typeof qForward.note === 'string' && /降级|不可达|禁用/.test(qForward.note), `ollama 不可达时 quote 如实自述已降级：${qForward.note}`);
+  const qSoyo = await safeRun('quote', { by: '爽世', top_k: 3 });
+  show('quote: by=爽世（限定说话人）', qSoyo);
+  ok(qSoyo.quotes?.length > 0, `quote 按角色取台词 ${qSoyo.quotes?.length ?? 0} 条`);
+  const eMask = await safeRun('event', { q: '面具', top_k: 2 });
+  show('event: 面具', eMask);
+  ok(Array.isArray(eMask.events), 'event 带 q 时返回 events 数组（不抛错）');
+  if (!up) ok(typeof eMask.note === 'string' && /降级|不可达|禁用/.test(eMask.note), `ollama 不可达时 event 如实自述已降级：${eMask.note}`);
 
   /* ---------- 档案 / 关系 ---------- */
   show('char: 初华', await tools.char.run({ name: '初华' }));
@@ -60,7 +88,9 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
   ok(stats.totals.角色 === 47, `stats 总数 47 人（2026-10-05 新增 薇欧拉 + 16 名主线相关 NPC）`);
   ok(stats.缺口.模型文档不存在.length === 0, 'stats：47 份模型文档全部存在');
 
-  show('world: 抹茶（检索）', await tools.world.run({ q: '抹茶', top_k: 3 }));
+  const wMatcha = await safeRun('world', { q: '抹茶', top_k: 3 });
+  show('world: 抹茶（检索）', wMatcha);
+  ok(wMatcha.results?.length > 0, `world 带 q 检索命中 ${wMatcha.results?.length ?? 0} 条（降级态同样可用）`);
   show('world: 场所全列', await tools.world.run({ kind: '场所' }));
 
   const s1 = await tools.sample.run({ name: '灯', n: 3 });
@@ -213,6 +243,76 @@ const ok = (cond, msg) => { if (!cond) { fail++; console.log(`  ✗ ${msg}`); } 
   ok(Object.keys(tools).length === TOOL_NAMES.length && TOOL_NAMES.every(n => typeof tools[n]?.run === 'function'),
     `工具总数 ${Object.keys(tools).length}（每个都有 run：${Object.keys(tools).join(',')}）`);
   ok(!Object.keys(tools).some(k => k.startsWith('kb_')), '工具名已去掉 kb_ 前缀（品牌由 mcp__canon__ 命名空间承担）');
+
+  /* ---------- 协议层自述里的数字，必须与 stats 现算值一致 ----------
+   * 动机：canon-mcp-core.mjs 的 description 是模型经 tools/list 直接读到的文本，
+   * 它曾经写「给全 30 人打偏差分」「看 30 人排名」「共 50 条」，而实际是 47 人 / 66 条；
+   * 同一批漂移还包括 README 的 17 工具、14 事件、309 检索块。
+   * 这里把「desc 里的数字」变成断言：数据涨了忘了改文案，这一行就会红。 */
+  const { TOOL_DEFS } = await import('./canon-mcp-core.mjs');
+  ok(Object.keys(TOOL_DEFS).length === Object.keys(tools).length,
+    `协议层 TOOL_DEFS ${Object.keys(TOOL_DEFS).length} 项 == 实现层 ${Object.keys(tools).length} 项（action 曾只更实现、漏更清单）`);
+  const numBefore = (s, unit) => {
+    const m = String(s ?? '').match(new RegExp('(\\d[\\d,]*)\\s*' + unit));
+    return m ? Number(m[1].replace(/,/g, '')) : null;
+  };
+  const descTruth = { 角色: stats.totals.角色, 世界书: stats.文本资产.世界书词条 };
+  for (const [tool, unit, truth, label] of [
+    ['who', '人', descTruth.角色, 'who 自述里的人数'],
+    ['speech', '人', descTruth.角色, 'speech 自述里的人数'],
+    ['worldbook', '条', descTruth.世界书, 'worldbook 自述里的词条数'],
+  ]) {
+    const got = numBefore(TOOL_DEFS[tool]?.description, unit);
+    ok(got === truth, `${label} = ${got}，与 stats 现算 ${truth} 一致`);
+  }
+
+  /* ---------- v1.6.x 修掉的 6 个契约缺陷：回归防线 ---------- */
+
+  // ① list 返回结构化条目，可直接回喂 char（旧版回的是给人看的显示串，回喂必失败）
+  const lst = await tools.list.run({});
+  ok(lst.角色.every(x => typeof x === 'object' && x.id && x.name), 'list 角色条目结构化（带 id/name），可直接回喂');
+  ok(lst.场所.length > 0 && lst.物件.length > 0 && lst.事件.length > 0,
+    `list 四类都给全：角色 ${lst.角色.length} / 事件 ${lst.事件.length} / 场所 ${lst.场所.length} / 物件 ${lst.物件.length}`);
+  const backFeed = await tools.char.run({ name: lst.角色[0].name });
+  ok(!backFeed.error, `list 里的 name 直接回喂 char 成功：${lst.角色[0].name} → ${backFeed.error || backFeed.name_short || backFeed.id}`);
+
+  // ② skills(band) 不再静默漏成员（rikki 文件夹名 ≠ canon id taki；band 字段还混着非规范拼写）
+  const skMygo = await tools.skills.run({ band: 'MyGO!!!!!' });
+  ok(skMygo.总数 === 5 && (skMygo.skills || []).some(x => x.id === 'rikki' && x.乐队 === 'MyGO!!!!!'),
+    `skills(band=MyGO!!!!!) = ${skMygo.总数} 且含 rikki（修前 4，静默漏立希）`);
+  ok((skMygo.告警_文件夹名与canonID不一致 || []).some(s => s.startsWith('rikki')),
+    `文件夹名与 canon id 不一致已如实告警：${JSON.stringify(skMygo.告警_文件夹名与canonID不一致)}`);
+  const skA = await tools.skills.run({ band: '一家Dumb Rock!' });
+  const skB = await tools.skills.run({ band: '一家DumbRock' });
+  ok(skA.总数 === 7 && skB.总数 === 7, `band 拼写已归一：'一家Dumb Rock!' = ${skA.总数} / '一家DumbRock' = ${skB.总数}（修前 5 / 2）`);
+  const skAll = await tools.skills.run({});
+  ok(skAll.总数 === 32 && !(skAll.skills || []).some(x => !x.乐队), `skills 全量 ${skAll.总数} 套且无 乐队=null`);
+
+  // ③ motion 的 model 接受中文角色名与 name 等价（旧版只认上游 model 名，中文名直接报错）
+  for (const nm of ['高松灯', '灯', '初华', '若叶睦', '椎名立希', 'Tomori']) {
+    const r = await tools.motion.run({ model: nm, exp_base: 'sad' });
+    ok(!r.error && !!r.model, `motion model=${nm} 解析成功 → ${r.error || r.model}`);
+  }
+  const moEqA = await tools.motion.run({ model: '高松灯', exp_base: 'sad' });
+  const moEqB = await tools.motion.run({ name: '高松灯', exp_base: 'sad' });
+  ok(moEqA.model === moEqB.model && moEqA.exp === moEqB.exp, 'motion 的 model 与 name 两个字段等价（同一结果）');
+
+  // ④ motion 的 conf 与「警告」互斥（旧版同一响应里 conf=high 且 警告=证据不足，实测 226 个组合中招）
+  const moThin = await tools.motion.run({ model: 'amoris', exp: 'exp_cry01' });
+  ok(moThin.canon_演出条数 < 3 && '警告' in moThin && !('conf' in moThin) && moThin.证据级别 === '不足',
+    `薄样本不再吐 conf：total=${moThin.canon_演出条数} / 证据级别=${moThin.证据级别} / conf=${'conf' in moThin ? moThin.conf : '已撤下'}`);
+  const moFat = await tools.motion.run({ model: 'tomori', exp_base: 'sad' });
+  ok(moFat.canon_演出条数 >= 3 && 'conf' in moFat && !('警告' in moFat) && moFat.证据级别 === '充分',
+    `充足样本给 conf 且无警告：total=${moFat.canon_演出条数} / conf=${moFat.conf}`);
+
+  // ⑤ worldbook 目录不截断：声明几条就必须给几条（旧版声明 66 条却只列 60 条）
+  const wbDir = await tools.worldbook.run({});
+  ok(wbDir.词条数 === wbDir.词条.length && wbDir.词条数 === descTruth.世界书,
+    `worldbook 目录 声明 ${wbDir.词条数} == 列出 ${wbDir.词条.length} == stats ${descTruth.世界书}（修前 66 / 60）`);
+
+  // ⑥ search 的 rerank 不再静默降级
+  const srRk = await tools.search.run({ q: '会撒娇的网络主播', rerank: true, top_k: 3 });
+  ok(typeof srRk.note === 'string' && /rerank/.test(srRk.note), `search 的 rerank 未生效时如实说明：${srRk.note}`);
 
   console.log(`\n${fail ? `✗ ${fail} 项断言失败` : '✓ 全部断言通过'}（${elapsed()}）`);
   process.exit(fail ? 1 : 0);

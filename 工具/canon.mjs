@@ -2,7 +2,7 @@
 /**
  * canon.mjs —— 《BanG Dream! Our Notes》资料库 · 调度/搜索 CLI
  *
- * 作品：BanG Dream! Our Notes（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock，25 人）
+ * 作品：BanG Dream! Our Notes（MyGO!!!!! / Ave Mujica / 梦限大MewType / millsage / 一家Dumb Rock，5 支乐队 25 人；全库在册 47 人）
  * 数据：资料库/kb.json（由 build_kb.mjs 生成）+ 角色卡/ + 世界书/ + 角色模型/
  * 与 MCP 的关系：本 CLI 是 mcp-canon/ 那套工具的命令行外壳，名字一一对应（MCP 工具 `char` ↔ `canon.mjs char`）。
  *

@@ -72,7 +72,9 @@ for (const [input, want] of CASES) {
   ok(got === want, `「${input}」→ ${want}${got === want ? '' : `（实得 ${got}）`}`);
 }
 
-/* ── 2. 全 25 人的「中文全名 / 日文全名 / 姓」都能命中自己 ── */
+/* ── 2. 全 25 名乐队成员的「中文全名 / 日文全名 / 姓」都能命中自己 ──
+ *   覆盖缺口：后入册的 22 人（真奈 / 薇欧拉 / 16 名 NPC）**不在本回归里**；
+ *   工具本身认全部 47 人，但把回归扩到 47 人仍是待办。 */
 const aliasDoc = JSON.parse(readFileSync(DEFAULT_ALIASES_PATH, 'utf8'));
 let missFull = [], missJa = [], missFam = [];
 for (const row of aliasDoc.characters) {
@@ -81,9 +83,9 @@ for (const row of aliasDoc.characters) {
   const fam = row.real.endsWith(row.short) ? row.real.slice(0, row.real.length - row.short.length) : null;
   if (fam && shortOf(fam) !== row.short) missFam.push(fam);
 }
-ok(missFull.length === 0, `25 人中文全名全部命中（漏: ${missFull.join('、') || '无'}）`);
-ok(missJa.length === 0, `25 人日文全名全部命中（漏: ${missJa.join('、') || '无'}）`);
-ok(missFam.length === 0, `25 人「只写姓」全部命中（漏: ${missFam.join('、') || '无'}）`);
+ok(missFull.length === 0, `25 名乐队成员中文全名全部命中（漏: ${missFull.join('、') || '无'}）`);
+ok(missJa.length === 0, `25 名乐队成员日文全名全部命中（漏: ${missJa.join('、') || '无'}）`);
+ok(missFam.length === 0, `25 名乐队成员「只写姓」全部命中（漏: ${missFam.join('、') || '无'}）`);
 
 /* ── 3. 歧义 / 未命中：如实回报，不猜 ── */
 const amb = resolveName('叶');
@@ -131,9 +133,9 @@ const e2 = await tools.char.run({ name: 'Ave Mujica' });
 asrt(/乐队名/.test(e2.提示 || ''), `乐队名给成员名单（${e2.提示}）`);
 const e3 = await tools.char.run({ name: '叶' });
 asrt(/歧义/.test(e3.error) && e3.candidates.length > 1, `歧义回执（${e3.error}：${e3.candidates.join('、')}）`);
-asrt(!e1.candidates || e1.candidates.length <= 6, 'candidates 是"最像的几个"而不是全部 25 人');
+asrt(!e1.candidates || e1.candidates.length <= 6, 'candidates 是"最像的几个"而不是全名册（47 人）');
 
 console.log(`\n── 名字索引 ──`);
 console.log(JSON.stringify(nameIndexStats(), null, 2));
-console.log(`\n${fail ? `✗ ${fail} 项断言失败` : `✓ 全部断言通过（${CASES.length} 条名字形态 + 25 人全量 + 工具端到端）`}`);
+console.log(`\n${fail ? `✗ ${fail} 项断言失败` : `✓ 全部断言通过（${CASES.length} 条名字形态 + 25 名乐队成员全量 + 工具端到端）`}`);
 process.exit(fail ? 1 : 0);
